@@ -1,7 +1,9 @@
 import Head from "next/head";
 import { useEffect } from "react";
 import GlobalStyle from "../components/globalStyle";
-import styled from "styled-components"
+import styled from "styled-components";
+import Header from "../components/header/header";
+import { useRouter } from "next/router";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -12,7 +14,7 @@ const Border = styled.div`
 	left: 0;
 	z-index: 10000000000000000;
 	pointer-events: none;
-`
+`;
 
 function MyApp({ Component, pageProps }) {
 	useEffect(() => {
@@ -30,6 +32,8 @@ function MyApp({ Component, pageProps }) {
 			}
 		})();
 	}, []);
+
+	const router = useRouter();
 
 	return (
 		<>
@@ -69,8 +73,9 @@ function MyApp({ Component, pageProps }) {
 				/>
 				<title>DisStreamChat</title>
 			</Head>
-			<GlobalStyle/>
-			<Border/>
+			<GlobalStyle />
+			<Border />
+			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
 			<Component {...pageProps} />
 		</>
 	);

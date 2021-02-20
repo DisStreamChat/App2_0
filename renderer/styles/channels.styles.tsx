@@ -9,9 +9,5 @@ export const ChannelMain = styled(Main)`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	background: linear-gradient(
-		119.36deg,
-		rgba(23, 24, 27, 0.631373) 21.35%,
-		rgba(36, 37, 42, 0.631373) 76.56%
-	);
+	background: var(--background-transparent-gray);
 `;

@@ -7,6 +7,7 @@ const GlobalStyle = createGlobalStyle`
 		--disstreamchat-purple: #462b45;
 		--background-dark-gray: #17181b;
 		--background-light-gray: #24252a;
+		--background-transparent-gray: rgba(23, 24, 27, 0.631);
 		--header-height: 134px;
 		--youtube-background: linear-gradient(320.75deg, rgb(255, 0, 0) 8.4%, rgb(182, 0, 52) 100.11%);
 		--twitch-background: linear-gradient(

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
     "chroma-js": "^2.1.0",
     "custom-electron-titlebar": "^3.2.6",
     "electron-serve": "^1.0.0",
