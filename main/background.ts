@@ -22,13 +22,20 @@ if (isProd) {
 	mainWindow.loadURL(baseUrl())
 })();
 
+let settingsWindow : Electron.BrowserWindow | null = null;
 ipcMain.on("open-settings", (event, arg) => {
-	const settingsWindow = createWindow("settings", {
+	if(settingsWindow){
+		if (settingsWindow.isMinimized()) settingsWindow.restore()
+		settingsWindow.focus()
+		return 
+	}
+	settingsWindow = createWindow("settings", {
 		width: 500,
 		height: 500,
 	})
 
 	settingsWindow.loadURL(baseUrl("settings"))
+	settingsWindow.on("close", () => settingsWindow = null)
 });
 
 app.on("window-all-closed", () => {
