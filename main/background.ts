@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, globalShortcut } from "electron";
 import serve from "electron-serve";
 import { baseUrl, createWindow } from "./helpers";
 import { ipcMain } from "electron";
@@ -19,23 +19,29 @@ if (isProd) {
 		alwaysOnTop: true,
 	});
 
-	mainWindow.loadURL(baseUrl())
+	mainWindow.loadURL(baseUrl());
+
+
+	globalShortcut.register("f7", () => {
+		mainWindow.setOpacity(.5);
+		mainWindow.setIgnoreMouseEvents(true);
+	});
 })();
 
-let settingsWindow : Electron.BrowserWindow | null = null;
+let settingsWindow: Electron.BrowserWindow | null = null;
 ipcMain.on("open-settings", (event, arg) => {
-	if(settingsWindow){
-		if (settingsWindow.isMinimized()) settingsWindow.restore()
-		settingsWindow.focus()
-		return 
+	if (settingsWindow) {
+		if (settingsWindow.isMinimized()) settingsWindow.restore();
+		settingsWindow.focus();
+		return;
 	}
 	settingsWindow = createWindow("settings", {
 		width: 500,
 		height: 500,
-	})
+	});
 
-	settingsWindow.loadURL(baseUrl("settings"))
-	settingsWindow.on("close", () => settingsWindow = null)
+	settingsWindow.loadURL(baseUrl("settings"));
+	settingsWindow.on("close", () => (settingsWindow = null));
 });
 
 app.on("window-all-closed", () => {
