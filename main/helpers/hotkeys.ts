@@ -54,6 +54,7 @@ class HotKeyManager {
 	unfocusCallback() {
 		const windows = BrowserWindow.getAllWindows();
 		for(const window of windows){
+			window.emit("key-blur")
 			window.setOpacity(this.unfocusOpacity)
 			window.setIgnoreMouseEvents(true)
 			window.emit("blur")
@@ -63,6 +64,7 @@ class HotKeyManager {
 	focusCallback() {
 		const windows = BrowserWindow.getAllWindows();
 		for(const window of windows){
+			window.emit("key-focus")
 			window.setOpacity(1)
 			window.setIgnoreMouseEvents(false)
 			window.emit("focus")

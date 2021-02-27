@@ -1,9 +1,10 @@
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import GlobalStyle from "../components/globalStyle";
 import styled from "styled-components";
 import Header from "../components/header/header";
 import { useRouter } from "next/router";
+import {remote} from "electron"
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -17,6 +18,9 @@ const Border = styled.div`
 `;
 
 function MyApp({ Component, pageProps }) {
+
+	const [windowFocused, setWindowFocused] = useState(true)
+
 	useEffect(() => {
 		(async () => {
 			if (typeof window !== "undefined") {
@@ -34,6 +38,23 @@ function MyApp({ Component, pageProps }) {
 	}, []);
 
 	const router = useRouter();
+
+
+	const currentWindow = remote?.getCurrentWindow?.()
+
+	const focusHandler = () => setWindowFocused(true)
+	const unfocusHandler = () => setWindowFocused(false)
+
+	useEffect(() => {
+		if(currentWindow){
+
+			// the typing for browserWindow only allows certain events, but I am adding my own to handle hotkey focus
+			// @ts-ignore
+			currentWindow.on("key-focus", focusHandler)
+			// @ts-ignore
+			currentWindow.on("key-blur", unfocusHandler)
+		}
+	}, [])
 
 	return (
 		<>
@@ -74,7 +95,7 @@ function MyApp({ Component, pageProps }) {
 				<title>DisStreamChat</title>
 			</Head>
 			<GlobalStyle />
-			{!router.asPath.includes("settings") && <Border />}
+			{!router.asPath.includes("settings") && windowFocused && <Border />}
 			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
 			<Component {...pageProps} />
 		</>
