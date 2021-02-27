@@ -74,7 +74,7 @@ function MyApp({ Component, pageProps }) {
 				<title>DisStreamChat</title>
 			</Head>
 			<GlobalStyle />
-			<Border />
+			{!router.asPath.includes("settings") && <Border />}
 			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
 			<Component {...pageProps} />
 		</>
