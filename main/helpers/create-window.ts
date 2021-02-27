@@ -10,7 +10,7 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
 		height: options.height,
 	};
 	let state = {};
-	let win;
+	let win : BrowserWindow;
 
 	const restore = () => store.get(key, defaultSize);
 
@@ -80,6 +80,13 @@ export default (windowName: string, options: BrowserWindowConstructorOptions): B
 	win = new BrowserWindow(browserOptions);
 
 	win.on("close", saveState);
+	
+	// this is a work around for a bug in electron that prevents a window from closing if the dev tools are open
+	win.on("close", () => {
+		if(win.webContents.isDevToolsOpened()){
+			win.webContents.closeDevTools()
+		}
+	})
 
 	return win;
 };
