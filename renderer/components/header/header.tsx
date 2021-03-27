@@ -3,6 +3,7 @@ import { HeaderBody, IconSection } from "../../styles/header.styles";
 import { useRouter } from "next/router";
 import SettingsIcon from "@material-ui/icons/Settings";
 import { ClearButton, PurpleButton } from "../../styles/button.styles";
+import firebaseClient from "../../firebase/client";
 const { ipcRenderer } = require("electron");
 
 const Header = () => {
@@ -13,7 +14,14 @@ const Header = () => {
 	return (
 		<HeaderBody>
 			<IconSection>
-				<PurpleButton>Sign out</PurpleButton>
+				<PurpleButton
+					onClick={async () => {
+						await firebaseClient.logout();
+						router.push("/auth");
+					}}
+				>
+					Sign out
+				</PurpleButton>
 				<ClearButton
 					onClick={() => {
 						ipcRenderer.send("open-settings");

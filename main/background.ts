@@ -29,7 +29,13 @@ if (isProd) {
 		alwaysOnTop: true,
 	});
 
-	mainWindow.loadURL(baseUrl());
+	ipcMain.on("login-data", (event, token) => {
+		if (mainWindow) {
+			mainWindow.webContents.send("log-me-in", token);
+		}
+	}); 
+
+	mainWindow.loadURL(baseUrl("auth"));
 
 	resetHotkeys()
 })();
@@ -51,6 +57,8 @@ ipcMain.on("open-settings", (event, arg) => {
 	settingsWindow.loadURL(baseUrl("settings"));
 	settingsWindow.on("close", () => (settingsWindow = null));
 });
+
+
 
 ipcMain.on("clear-hotkeys", () => {
 	hotKeyManager.unregisterAll()

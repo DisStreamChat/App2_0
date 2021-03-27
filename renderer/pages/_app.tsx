@@ -4,7 +4,7 @@ import GlobalStyle from "../components/globalStyle";
 import styled from "styled-components";
 import Header from "../components/header/header";
 import { useRouter } from "next/router";
-import {remote} from "electron"
+import { remote } from "electron";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -18,8 +18,7 @@ const Border = styled.div`
 `;
 
 function MyApp({ Component, pageProps }) {
-
-	const [windowFocused, setWindowFocused] = useState(true)
+	const [windowFocused, setWindowFocused] = useState(true);
 
 	useEffect(() => {
 		(async () => {
@@ -39,22 +38,20 @@ function MyApp({ Component, pageProps }) {
 
 	const router = useRouter();
 
+	const currentWindow = remote?.getCurrentWindow?.();
 
-	const currentWindow = remote?.getCurrentWindow?.()
-
-	const focusHandler = () => setWindowFocused(true)
-	const unfocusHandler = () => setWindowFocused(false)
+	const focusHandler = () => setWindowFocused(true);
+	const unfocusHandler = () => setWindowFocused(false);
 
 	useEffect(() => {
-		if(currentWindow){
-
+		if (currentWindow) {
 			// the typing for browserWindow only allows certain events, but I am adding my own to handle hotkey focus
 			// @ts-ignore
-			currentWindow.on("key-focus", focusHandler)
+			currentWindow.on("key-focus", focusHandler);
 			// @ts-ignore
-			currentWindow.on("key-blur", unfocusHandler)
+			currentWindow.on("key-blur", unfocusHandler);
 		}
-	}, [])
+	}, []);
 
 	return (
 		<>
