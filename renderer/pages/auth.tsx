@@ -73,12 +73,10 @@ const AuthPage = () => {
 	const loginWithTwitch = async () => {
 		try {
 			const id = v4();
-			console.log(id);
 			const oneTimeCodeRef = firebaseClient.db.collection("oneTimeCodes").doc(id);
 
 			oneTimeCodeRef.onSnapshot(async snapshot => {
 				const data = snapshot.data();
-				console.log(snapshot);
 				if (data) {
 					const token = data.authToken;
 					nookies.set(null, "auth-token", token, { path: "/" });
@@ -160,7 +158,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const token = cookies["auth_token"]
 
 	console.log(token)
-	if (verifyIdToken(token)) {
+	if (token && verifyIdToken(token)) {
 		res.writeHead(307, { location: "/channels" }).end();
 	}
 	return { props: {} };

@@ -52,8 +52,16 @@ class Firebase {
 		return this.auth.currentUser.displayName;
 	}
 
-	delete() {
+	get delete() {
 		return this.app.firestore.FieldValue.delete();
+	}
+
+	get append() {
+		return this.app.firestore.FieldValue.arrayUnion
+	}
+
+	get remove() {
+		return this.app.firestore.FieldValue.arrayRemove
 	}
 
 	updateDoc(path: string, data: any) {

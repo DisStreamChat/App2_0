@@ -27,6 +27,8 @@ if (isProd) {
 		width: 1000,
 		height: 600,
 		alwaysOnTop: true,
+		fullscreenable: false,
+
 	});
 
 	ipcMain.on("login-data", (event, token) => {

@@ -5,6 +5,8 @@ import styled from "styled-components";
 import Header from "../components/header/header";
 import { useRouter } from "next/router";
 import { remote } from "electron";
+import { AppContextProvider } from "../contexts/appContext";
+import { AuthContextProvider } from "../contexts/authContext";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -92,9 +94,15 @@ function MyApp({ Component, pageProps }) {
 				<title>DisStreamChat</title>
 			</Head>
 			<GlobalStyle />
-			{!router.asPath.includes("settings") && windowFocused && <Border />}
-			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
-			<Component {...pageProps} />
+			<AuthContextProvider>
+				<AppContextProvider>
+					{!router.asPath.includes("settings") && windowFocused && <Border />}
+					{!router.asPath.includes("auth") && !router.asPath.includes("settings") && (
+						<Header />
+					)}
+					<Component {...pageProps} />
+				</AppContextProvider>
+			</AuthContextProvider>
 		</>
 	);
 }
