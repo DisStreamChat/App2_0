@@ -7,6 +7,7 @@ import { v4 } from "uuid";
 import nookies from "nookies";
 import { verifyIdToken } from "../firebase/admin";
 import { GetServerSideProps } from "next";
+import { useState } from "react";
 
 const AuthContainer = styled.div`
 	width: 100vw;
@@ -68,10 +69,13 @@ const Logo = styled.img`
 
 const AuthPage = () => {
 	const router = useRouter();
-	console.log(firebaseClient.auth.currentUser);
+
+	const [termsChecked, setTermsChecked] = useState(false)
 
 	const loginWithTwitch = async () => {
 		try {
+			if(!termsChecked) return
+			console.log("logging in with twitch ")
 			const id = v4();
 			const oneTimeCodeRef = firebaseClient.db.collection("oneTimeCodes").doc(id);
 
@@ -89,7 +93,6 @@ const AuthPage = () => {
 			);
 		} catch (err) {
 			const receiveMessage = async (event, data) => {
-				console.log(data);
 				// console.log(data);
 				const json = data;
 				await firebaseClient.auth.signInWithCustomToken(json.token);
@@ -104,12 +107,16 @@ const AuthPage = () => {
 		}
 	};
 
+	const submitHandler = (e) => {
+		e.preventDefault();
+	}
+
 	return (
 		<AuthContainer>
 			<AuthBody>
 				<AuthHeader>Login to DisStreamChat</AuthHeader>
 				<AuthSubHeader>Connect with:</AuthSubHeader>
-				<form>
+				<form onSubmit={submitHandler}>
 					<TwitchButton onClick={loginWithTwitch} type="submit">
 						<Logo height="30" width="30" src="/images/twitch.svg"></Logo>Twitch
 					</TwitchButton>
@@ -123,7 +130,9 @@ const AuthPage = () => {
 							id="terms-check"
 							type="checkbox"
 							name="terms"
-							value="false"
+							//@ts-ignore
+							value={termsChecked}
+							onChange={e => setTermsChecked(e.target.checked)}
 						/>
 						<label htmlFor="terms-check">
 							I accept the{" "}
@@ -156,7 +165,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const cookies = nookies.get(context);
 
 	const token = cookies["auth_token"]
-
 	console.log(token)
 	if (token && verifyIdToken(token)) {
 		res.writeHead(307, { location: "/channels" }).end();
