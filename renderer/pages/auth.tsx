@@ -83,7 +83,7 @@ const AuthPage = () => {
 				const data = snapshot.data();
 				if (data) {
 					const token = data.authToken;
-					nookies.set(null, "auth-token", token, { path: "/" });
+					nookies.set(null, "auth-token", token, { path: "/", time });
 					await firebaseClient.auth.signInWithCustomToken(token);
 					router.push("/channels");
 				}
@@ -163,11 +163,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const { req, res, params } = context;
 
 	const cookies = nookies.get(context);
-
-	const token = cookies["auth_token"]
-	console.log(token)
-	if (token && verifyIdToken(token)) {
-		res.writeHead(307, { location: "/channels" }).end();
+	const token = cookies["auth-token"]
+	const verified = await verifyIdToken(token ?? "")
+	if (verified) {
+		res.writeHead(307, { location: "/channels" }).end()
 	}
 	return { props: {} };
 };
