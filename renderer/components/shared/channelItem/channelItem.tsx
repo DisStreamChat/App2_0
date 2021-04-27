@@ -5,10 +5,34 @@ import Link from "next/link";
 import { ChannelModel } from "../../../models/channel.model";
 import { authContext } from "../../../contexts/authContext";
 import useInterval from "react-use/lib/useInterval";
-import { ChannelInfo, ChannelItemBody, ChannelProfilePicture } from "./channelItem.style";
+import {
+	ChannelButtons,
+	ChannelInfo,
+	ChannelItemBody,
+	ChannelProfilePicture,
+	ChannelSearchBody,
+	ChannelSearchSection,
+} from "./channelItem.style";
 import { OrangeButton, PurpleButton, RedButton, TwitchButton } from "../../../styles/button.styles";
+interface ChannelProps extends ChannelModel {
+	isOwned?: boolean;
+}
 
-export const ChannelItem = React.memo((props: ChannelModel) => {
+export const ChannelSearchItem = React.memo(() => {
+	const [search, setSearch] = useState("")
+
+	return (
+		<ChannelSearchBody>
+			<h2>Add Channel</h2>
+			<ChannelSearchSection>
+				<SearchBox placeholder="Enter Channel Name" search={search} onChange={setSearch} />
+				<OrangeButton>Submit</OrangeButton>
+			</ChannelSearchSection>
+		</ChannelSearchBody>
+	);
+});
+
+export const ChannelItem = React.memo((props: ChannelProps) => {
 	const [channelName, setChannelName] = useState(props.name);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -100,12 +124,12 @@ export const ChannelItem = React.memo((props: ChannelModel) => {
 
 	return (
 		<ChannelItemBody>
-			<>
-				<ChannelProfilePicture live={isLive}>
-					<img src={props["profile_image_url"] || props.avatar} alt="" />
-				</ChannelProfilePicture>
-				<ChannelInfo>
-					<span className="channel-name">{channelName}</span>
+			<ChannelProfilePicture live={isLive}>
+				<img src={props["profile_image_url"] || props.avatar} alt="" />
+			</ChannelProfilePicture>
+			<ChannelInfo>
+				<span className="channel-name">{channelName}</span>
+				<ChannelButtons>
 					<Link href={`/chat/${props.id}`}>
 						<a className="dashboard-link">
 							<OrangeButton className="to-dashboard dashboard-button">
@@ -120,15 +144,17 @@ export const ChannelItem = React.memo((props: ChannelModel) => {
 							</OrangeButton>
 						</a>
 					</Link>
-					<Link href={`/chat/${props.id}`}>
-						<a className="dashboard-link">
-							<RedButton className="to-dashboard dashboard-button">
-								Go To Chat
-							</RedButton>
-						</a>
-					</Link>
-				</ChannelInfo>
-			</>
+					{!props.isOwned && (
+						<Link href={`/chat/${props.id}`}>
+							<a className="dashboard-link">
+								<RedButton className="to-dashboard dashboard-button">
+									Go To Chat
+								</RedButton>
+							</a>
+						</Link>
+					)}
+				</ChannelButtons>
+			</ChannelInfo>
 		</ChannelItemBody>
 	);
 });

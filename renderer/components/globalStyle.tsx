@@ -94,6 +94,10 @@ const GlobalStyle = createGlobalStyle`
 	.css-fac07y-container, .css-fac07y-container *{
 		color: white !important;
 	}
+
+	hr{
+		width: 100%;
+	}
 `;
 
 export default GlobalStyle;

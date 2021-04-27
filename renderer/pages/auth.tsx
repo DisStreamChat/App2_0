@@ -83,7 +83,7 @@ const AuthPage = () => {
 				const data = snapshot.data();
 				if (data) {
 					const token = data.authToken;
-					nookies.set(null, "auth-token", token, { path: "/", time });
+					nookies.set(null, "auth-token", token, { path: "/" });
 					await firebaseClient.auth.signInWithCustomToken(token);
 					router.push("/channels");
 				}
