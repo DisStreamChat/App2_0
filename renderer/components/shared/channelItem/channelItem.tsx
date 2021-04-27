@@ -14,18 +14,46 @@ import {
 	ChannelSearchSection,
 } from "./channelItem.style";
 import { OrangeButton, PurpleButton, RedButton, TwitchButton } from "../../../styles/button.styles";
+import { AppContext } from "../../../contexts/appContext";
 interface ChannelProps extends ChannelModel {
 	isOwned?: boolean;
 }
 
 export const ChannelSearchItem = React.memo(() => {
-	const [search, setSearch] = useState("")
+	const [search, setSearch] = useState("");
+	const { setSavedChannels } = useContext(AppContext);
+
+	const resetSearch = () => setSearch("");
+
+	const submit = async e => {
+		e.preventDefault();
+		console.log(search);
+		const response = await fetch(
+			`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`
+		);
+		const json = await response.json();
+		if (json.exists) {
+			const { data } = json;
+			console.log(data);
+			const { profile_image_url, display_name, id } = data;
+			setSavedChannels(prev => [
+				...prev,
+				{ name: display_name, avatar: profile_image_url, id },
+			]);
+		}
+		resetSearch();
+	};
 
 	return (
 		<ChannelSearchBody>
 			<h2>Add Channel</h2>
-			<ChannelSearchSection>
-				<SearchBox placeholder="Enter Channel Name" search={search} onChange={setSearch} />
+			<ChannelSearchSection onSubmit={submit}>
+				<SearchBox
+					placeholder="Enter Channel Name"
+					search={search}
+					onChange={setSearch}
+					resetSearch={resetSearch}
+				/>
 				<OrangeButton>Submit</OrangeButton>
 			</ChannelSearchSection>
 		</ChannelSearchBody>

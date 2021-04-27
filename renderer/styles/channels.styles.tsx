@@ -31,4 +31,8 @@ export const ModChannels = styled.div`
 	overflow-y: auto;
 	margin-bottom: 0.5rem;
 	position: relative;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
 `;

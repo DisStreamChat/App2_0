@@ -49,7 +49,7 @@ export const ChannelSearchBody = styled(ChannelItemBody)`
 	}
 `;
 
-export const ChannelSearchSection = styled.div`
+export const ChannelSearchSection = styled.form`
 	width: 100%;
 	display: flex;
 	align-items: center;
