@@ -28,7 +28,7 @@ if (isProd) {
 		alwaysOnTop: true,
 		fullscreenable: false,
 	});
-
+	
 	ipcMain.on("login-data", (event, token) => {
 		if (mainWindow) {
 			mainWindow.webContents.send("log-me-in", token);

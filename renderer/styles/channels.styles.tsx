@@ -15,14 +15,14 @@ export const ChannelMain = styled(Main)`
 		font-family: Poppins;
 		font-size: 32px;
 	}
-	@media screen and (max-width: 725px){
+	@media screen and (max-width: 725px) {
 		padding: 0 2rem;
 	}
-	@media screen and (max-width: 500px){
+	@media screen and (max-width: 500px) {
 		padding: 0 1rem;
 	}
-	@media screen and (max-width: 500px){
-		padding: 0 .5rem;
+	@media screen and (max-width: 500px) {
+		padding: 0 0.5rem;
 	}
 `;
 
@@ -35,4 +35,7 @@ export const ModChannels = styled.div`
 	display: flex;
 	align-items: center;
 	flex-direction: column;
+	&::-webkit-scrollbar {
+		width: 5px;
+	}
 `;
