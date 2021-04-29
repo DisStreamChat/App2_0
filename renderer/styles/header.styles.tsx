@@ -18,6 +18,9 @@ export const IconSection = styled.div`
 	justify-content: space-around;
 	max-width: none;
 	height: 100%;
-
+	padding: 0 1rem;
 	align-items: center;
+	&.chat-header{
+		justify-content: space-between;
+	}
 `;
