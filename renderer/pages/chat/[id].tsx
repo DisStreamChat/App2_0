@@ -1,8 +1,10 @@
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import { Main } from "../../styles/global.styles";
 import useSocket from "../../hooks/useSocket";
 import useSocketEvent from "../../hooks/useSocketEvent";
+import { Message, MessageList } from "disstreamchat-utils";
+import { MessageModel } from "../../models/message.model";
 
 const Chat = () => {
 	const router = useRouter();
@@ -11,6 +13,7 @@ const Chat = () => {
 		transports: ["websocket"],
 		reconnect: true,
 	});
+	const [messages, setMessages] = useState<MessageModel[]>([]);
 	socket?.on?.("connection_error", console.log);
 
 	useSocketEvent(socket, "imConnected", () => {
@@ -19,10 +22,32 @@ const Chat = () => {
 
 	useSocketEvent(socket, "chatmessage", msg => {
 		console.log(msg);
+		setMessages(prev => [
+			...prev,
+			{
+				content: msg.body,
+				id: msg.id,
+				platform: msg.platform,
+				sender: {
+					name: msg.displayName,
+					avatar: msg.avatar,
+					badges: msg.badges,
+					color: msg.userColor,
+				},
+			},
+		]);
 		// socket.emit("addme", { twitchName: "dav1dsnyder404" });
 	});
 
-	return <Main>{id}</Main>;
+	return (
+		<Main>
+			<MessageList>
+				{messages.map(msg => (
+					<Message {...msg}></Message>
+				))}
+			</MessageList>
+		</Main>
+	);
 };
 
 export default Chat;
