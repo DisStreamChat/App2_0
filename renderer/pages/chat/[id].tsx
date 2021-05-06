@@ -21,7 +21,6 @@ const Chat = () => {
 	});
 
 	useSocketEvent(socket, "chatmessage", msg => {
-		console.log(msg);
 		setMessages(prev => [
 			...prev,
 			{
@@ -36,7 +35,6 @@ const Chat = () => {
 				},
 			},
 		]);
-		// socket.emit("addme", { twitchName: "dav1dsnyder404" });
 	});
 
 	return (
