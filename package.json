@@ -24,6 +24,7 @@
     "nookies": "^2.5.2",
     "react-socket-io": "^0.2.5",
     "react-use": "^17.2.4",
+    "react-window-dynamic-list": "^2.3.5",
     "rxjs": "^6.6.6",
     "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.1",
