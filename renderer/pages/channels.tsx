@@ -1,10 +1,39 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { ChannelItem, ChannelSearchItem } from "../components/shared/channelItem/channelItem";
 import { AppContext } from "../contexts/appContext";
+import { authContext } from "../contexts/authContext";
 import { ChannelMain, ModChannels } from "../styles/channels.styles";
+import firebaseClient from "../firebase/client";
+import { ChannelModel } from "../models/channel.model";
 
 const Channels = () => {
-	const { savedChannels } = useContext(AppContext);
+	const { savedChannels, setSavedChannels, setTabChannels } = useContext(AppContext);
+	const { user } = useContext(authContext);
+
+	useEffect(() => {
+		(async () => {
+			if (!user) return;
+			const docRef = firebaseClient.db.collection("Streamers").doc(user.uid);
+			const doc = await docRef.get();
+			const data = await doc.data();
+			const { ModChannels } = data;
+			const channels: ChannelModel[] = ModChannels.map(channel => ({
+				name: channel.display_name,
+				avatar: channel.profile_image_url,
+				id: channel.id,
+			}));
+			console.log(channels);
+			setSavedChannels(channels);
+			setTabChannels(
+				channels.filter(channel =>
+					["cozycoding", "Kitboga", "SaintPlaysThings", "CodingGarden"].includes(
+						channel.name
+					)
+				)
+			);
+		})();
+	}, [user]);
+
 	return (
 		<ChannelMain>
 			<h1>Your Channel</h1>
@@ -18,10 +47,10 @@ const Channels = () => {
 			<h1>Saved Channels</h1>
 			<ModChannels>
 				{savedChannels.map(channel => (
-					<ChannelItem {...channel} />
+					<ChannelItem {...channel} key={channel.id} />
 				))}
 			</ModChannels>
-			<ChannelSearchItem/>
+			<ChannelSearchItem />
 		</ChannelMain>
 	);
 };

@@ -6,7 +6,8 @@ import { ClearButton, PurpleButton } from "../../styles/button.styles";
 import firebaseClient from "../../firebase/client";
 import { TwitchUserModel } from "../../models/user.model";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import HomeIcon from '@material-ui/icons/Home';
+import HomeIcon from "@material-ui/icons/Home";
+import { Link } from "@material-ui/core";
 const { ipcRenderer } = require("electron");
 
 const Header = () => {
@@ -46,9 +47,13 @@ const Header = () => {
 					</div>
 				)}
 				<div>
-					<ClearButton>
-						<HomeIcon/>
-					</ClearButton>
+					<Link href="/channels">
+						<a>
+							<ClearButton>
+								<HomeIcon />
+							</ClearButton>
+						</a>
+					</Link>
 					<ClearButton
 						onClick={() => {
 							ipcRenderer.send("open-settings");
