@@ -9,6 +9,12 @@ import sha1 from "sha1";
 import firebaseClient from "../../firebase/client";
 import { AppContext } from "../../contexts/appContext";
 import Link from "next/link";
+import styled from "styled-components";
+import { TabContainer, Tab } from "../../styles/chat.style";
+
+const ChatMain = styled(Main)`
+	flex-direction: column;
+`;
 
 const Chat = () => {
 	const router = useRouter();
@@ -20,10 +26,6 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const { tabChannels, savedChannels } = useContext(AppContext);
-
-	console.log({savedChannels, tabChannels})
-
-	socket?.on?.("connection_error", console.log);
 
 	useSocketEvent(socket, "imConnected", () => {
 		if (channel) {
@@ -40,7 +42,6 @@ const Chat = () => {
 				const docRef = firebaseClient.db.collection("Streamers").doc(firebaseId);
 				const doc = await docRef.get();
 				const data = doc.data();
-				console.log(data);
 				const { guildId, liveChatId, TwitchName } = data;
 				setChannel({ guildId, liveChatId, TwitchName });
 			} catch (err) {
@@ -50,6 +51,7 @@ const Chat = () => {
 	}, [id]);
 
 	useEffect(() => {
+		console.log({channel})
 		if (channel) {
 			// send info to backend with sockets, to get proper socket connection
 			if (socket) {
@@ -76,20 +78,22 @@ const Chat = () => {
 	});
 
 	return (
-		<Main>
-			<div>
+		<ChatMain>
+			<TabContainer>
 				{tabChannels.map(channel => (
-					<Link href={`/chat/${channel.id}`}>
-						<a>{channel.name}</a>
-					</Link>
+					<Tab className={`${id === channel.id ? "active" : ""}`}>
+						<Link href={`/chat/${channel.id}`}>
+							<a>{channel.name}</a>
+						</Link>
+					</Tab>
 				))}
-			</div>
+			</TabContainer>
 			<MessageList>
 				{messages.map(msg => (
 					<Message {...msg}></Message>
 				))}
 			</MessageList>
-		</Main>
+		</ChatMain>
 	);
 };
 
