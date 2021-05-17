@@ -1,5 +1,5 @@
 import firebaseClient from "../../../firebase/client";
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useState, useContext, useEffect, useCallback, forwardRef } from "react";
 import { SearchBox } from "disstreamchat-utils";
 import Link from "next/link";
 import { ChannelModel } from "../../../models/channel.model";
@@ -17,6 +17,7 @@ import { OrangeButton, PurpleButton, RedButton, TwitchButton } from "../../../st
 import { AppContext } from "../../../contexts/appContext";
 interface ChannelProps extends ChannelModel {
 	isOwned?: boolean;
+	passKey?: any
 }
 
 export const ChannelSearchItem = React.memo(() => {
@@ -34,7 +35,6 @@ export const ChannelSearchItem = React.memo(() => {
 		const json = await response.json();
 		if (json.exists) {
 			const { data } = json;
-			console.log(data);
 			const { profile_image_url, display_name, id } = data;
 			setSavedChannels(prev => [
 				...prev,
@@ -60,7 +60,7 @@ export const ChannelSearchItem = React.memo(() => {
 	);
 });
 
-export const ChannelItem = React.memo((props: ChannelProps) => {
+export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [channelName, setChannelName] = useState(props.name);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -150,8 +150,9 @@ export const ChannelItem = React.memo((props: ChannelProps) => {
 		[channelName, user?.uid, user]
 	);
 
+
 	return (
-		<ChannelItemBody>
+		<ChannelItemBody ref={ref} key={props.passKey}>
 			<ChannelProfilePicture live={isLive}>
 				<img src={props["profile_image_url"] || props.avatar} alt="" />
 			</ChannelProfilePicture>

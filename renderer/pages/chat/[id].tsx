@@ -11,6 +11,7 @@ import { AppContext } from "../../contexts/appContext";
 import Link from "next/link";
 import styled from "styled-components";
 import { TabContainer, Tab } from "../../styles/chat.style";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -33,6 +34,7 @@ const Chat = () => {
 		}
 	});
 
+
 	useEffect(() => {
 		(async () => {
 			try {
@@ -51,7 +53,7 @@ const Chat = () => {
 	}, [id]);
 
 	useEffect(() => {
-		console.log({channel})
+		console.log({ channel });
 		if (channel) {
 			// send info to backend with sockets, to get proper socket connection
 			if (socket) {

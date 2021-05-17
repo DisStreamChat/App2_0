@@ -5,6 +5,12 @@ import { authContext } from "../contexts/authContext";
 import { ChannelMain, ModChannels } from "../styles/channels.styles";
 import firebaseClient from "../firebase/client";
 import { ChannelModel } from "../models/channel.model";
+import Reorder, {
+	reorder,
+	reorderImmutable,
+	reorderFromTo,
+	reorderFromToImmutable,
+} from "react-reorder";
 
 const Channels = () => {
 	const { savedChannels, setSavedChannels, setTabChannels } = useContext(AppContext);
@@ -34,6 +40,11 @@ const Channels = () => {
 		})();
 	}, [user]);
 
+	const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
+		console.log(previousIndex, nextIndex);
+		setSavedChannels(prev => reorder(prev, previousIndex, nextIndex));
+	};
+
 	return (
 		<ChannelMain>
 			<h1>Your Channel</h1>
@@ -45,11 +56,27 @@ const Channels = () => {
 			></ChannelItem>
 			<hr></hr>
 			<h1>Saved Channels</h1>
-			<ModChannels>
+			<Reorder
+				reorderId="my-list" // Unique ID that is used internally to track this list (required)
+				reorderGroup="reorder-group" // A group ID that allows items to be dragged between lists of the same group (optional)
+				component={ModChannels} // Tag name or Component to be used for the wrapping element (optional), defaults to 'div'
+				placeholderClassName="placeholder" // Class name to be applied to placeholder elements (optional), defaults to 'placeholder'
+				draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
+				lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
+				onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
+				autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
+				disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
+				
+			>
 				{savedChannels.map(channel => (
-					<ChannelItem {...channel} key={channel.id} />
+					<div key={channel.id} className="">
+						<ChannelItem {...channel} passKey={channel.id} key={channel.id} />
+					</div>
 				))}
-			</ModChannels>
+				{/* {savedChannels.map(channel => (
+					<li key={channel.name}>{channel.name}</li>
+				))} */}
+			</Reorder>
 			<ChannelSearchItem />
 		</ChannelMain>
 	);

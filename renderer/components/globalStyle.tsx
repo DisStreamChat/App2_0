@@ -98,6 +98,16 @@ const GlobalStyle = createGlobalStyle`
 	hr{
 		width: 100%;
 	}
+
+	.dragged {
+		&, & * {
+			z-index: 100;
+		}
+	}
+
+	.placeholder {
+		opacity: .5
+	}
 `;
 
 export default GlobalStyle;

@@ -12,6 +12,7 @@ export const ChannelItemBody = styled.div`
 	transition: 0.25s;
 	animation: fade-in 0.5s ease-in-out forwards;
 	padding: 1rem 0;
+	
 	@media screen and (max-width: 775px) {
 		&,
 		& * {
@@ -36,7 +37,7 @@ export const ChannelSearchBody = styled(ChannelItemBody)`
 	align-items: center;
 	justify-content: center;
 	padding: 1rem;
-	.settings--searchbox{
+	.settings--searchbox {
 		font-family: Poppins;
 		font-weight: bold;
 	}
@@ -54,7 +55,7 @@ export const ChannelSearchSection = styled.form`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-`
+`;
 
 export const ChannelProfilePicture = styled.div`
 	img {
