@@ -66,16 +66,12 @@ const Channels = () => {
 				onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
 				autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
 				disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
-				
 			>
 				{savedChannels.map(channel => (
 					<div key={channel.id} className="">
 						<ChannelItem {...channel} passKey={channel.id} key={channel.id} />
 					</div>
 				))}
-				{/* {savedChannels.map(channel => (
-					<li key={channel.name}>{channel.name}</li>
-				))} */}
 			</Reorder>
 			<ChannelSearchItem />
 		</ChannelMain>
