@@ -4,7 +4,7 @@ export const HeaderBody = styled.header`
 	position: absolute;
 	top: 0;
 	height: 65px;
-	width: 100vw;
+	width: 100%;
 	background: var(--background-transparent-gray);
     display: flex;
     align-items: center;

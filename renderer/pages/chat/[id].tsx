@@ -26,15 +26,12 @@ const Chat = () => {
 	const [channel, setChannel] = useState<any>();
 	const { tabChannels, savedChannels } = useContext(AppContext);
 
-	console.log({savedChannels, tabChannels})
-
-	socket?.on?.("connection_error", console.log);
-
 	useSocketEvent(socket, "imConnected", () => {
 		if (channel) {
 			socket.emit("addme", channel);
 		}
 	});
+
 
 	useEffect(() => {
 		(async () => {
@@ -45,7 +42,6 @@ const Chat = () => {
 				const docRef = firebaseClient.db.collection("Streamers").doc(firebaseId);
 				const doc = await docRef.get();
 				const data = doc.data();
-				console.log(data);
 				const { guildId, liveChatId, TwitchName } = data;
 				setChannel({ guildId, liveChatId, TwitchName });
 			} catch (err) {
@@ -55,6 +51,7 @@ const Chat = () => {
 	}, [id]);
 
 	useEffect(() => {
+		console.log({ channel });
 		if (channel) {
 			// send info to backend with sockets, to get proper socket connection
 			if (socket) {
@@ -84,7 +81,7 @@ const Chat = () => {
 		<ChatMain>
 			<TabContainer>
 				{tabChannels.map(channel => (
-					<Tab>
+					<Tab className={`${id === channel.id ? "active" : ""}`}>
 						<Link href={`/chat/${channel.id}`}>
 							<a>{channel.name}</a>
 						</Link>
