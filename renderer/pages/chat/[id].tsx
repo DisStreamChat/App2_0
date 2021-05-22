@@ -9,6 +9,11 @@ import sha1 from "sha1";
 import firebaseClient from "../../firebase/client";
 import { AppContext } from "../../contexts/appContext";
 import Link from "next/link";
+import styled from "styled-components"
+import {Tab, TabContainer} from "../../styles/tabs.styles"
+const ChatMain = styled(Main)`
+	flex-direction: column;
+`
 
 const Chat = () => {
 	const router = useRouter();
@@ -76,20 +81,22 @@ const Chat = () => {
 	});
 
 	return (
-		<Main>
-			<div>
+		<ChatMain>
+			<TabContainer>
 				{tabChannels.map(channel => (
-					<Link href={`/chat/${channel.id}`}>
-						<a>{channel.name}</a>
-					</Link>
+					<Tab>
+						<Link href={`/chat/${channel.id}`}>
+							<a>{channel.name}</a>
+						</Link>
+					</Tab>
 				))}
-			</div>
+			</TabContainer>
 			<MessageList>
 				{messages.map(msg => (
 					<Message {...msg}></Message>
 				))}
 			</MessageList>
-		</Main>
+		</ChatMain>
 	);
 };
 
