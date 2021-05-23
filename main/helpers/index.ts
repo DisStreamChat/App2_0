@@ -1,8 +1,8 @@
-import createWindow from "./create-window";
+export * from "./create-window";
 
-const isProd: boolean = process.env.NODE_ENV === "production";
+export const isProd: boolean = process.env.NODE_ENV === "production";
 
-const baseUrl = (path="home") => {
+export const baseUrl = (path="home") => {
 	if (isProd) {
 		return `app://./${path}.html`;
 	} else {
@@ -11,4 +11,3 @@ const baseUrl = (path="home") => {
 	}
 };
 
-export { createWindow, baseUrl };

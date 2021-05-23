@@ -12,6 +12,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { TabContainer, Tab } from "../../styles/chat.style";
 import { useCollectionData } from "react-firebase-hooks/firestore";
+import { ipcRenderer } from "electron";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -30,22 +31,20 @@ const Chat = () => {
 
 	useSocketEvent(socket, "imConnected", () => {
 		if (channel) {
-			socket.emit("addme", channel);
+			socket.emit("add", channel);
 		}
 	});
-
 
 	useEffect(() => {
 		(async () => {
 			try {
 				if (!id) return;
 				const firebaseId = sha1(id);
-				console.log(firebaseId);
 				const docRef = firebaseClient.db.collection("Streamers").doc(firebaseId);
 				const doc = await docRef.get();
 				const data = doc.data();
-				const { guildId, liveChatId, TwitchName } = data;
-				setChannel({ guildId, liveChatId, TwitchName });
+				const { guildId, liveChatId, TwitchName: twitchName } = data;
+				setChannel({ guildId, liveChatId, twitchName });
 			} catch (err) {
 				console.log(err.message);
 			}
@@ -53,30 +52,40 @@ const Chat = () => {
 	}, [id]);
 
 	useEffect(() => {
+		if (channel) {
+			ipcRenderer.on("sendMessages", (event, messages) => {
+				setMessages(messages);
+			});
+			ipcRenderer.send("getMessages", channel.twitchName);
+		}
+		return () => {
+			ipcRenderer.removeAllListeners("sendMessages");
+		};
+	}, [channel]);
+
+	useEffect(() => {
 		console.log({ channel });
 		if (channel) {
-			// send info to backend with sockets, to get proper socket connection
 			if (socket) {
-				socket.emit("addme", channel);
+				socket.emit("add", channel);
 			}
 		}
 	}, [channel, socket]);
 
 	useSocketEvent(socket, "chatmessage", msg => {
-		setMessages(prev => [
-			...prev,
-			{
-				content: msg.body,
-				id: msg.id,
-				platform: msg.platform,
-				sender: {
-					name: msg.displayName,
-					avatar: msg.avatar,
-					badges: msg.badges,
-					color: msg.userColor,
-				},
+		const transformedMessage = {
+			content: msg.body,
+			id: msg.id,
+			platform: msg.platform,
+			sender: {
+				name: msg.displayName,
+				avatar: msg.avatar,
+				badges: msg.badges,
+				color: msg.userColor,
 			},
-		]);
+		};
+		ipcRenderer.send("writeMessage", channel.twitchName, transformedMessage);
+		setMessages(prev => [...prev, transformedMessage]);
 	});
 
 	return (

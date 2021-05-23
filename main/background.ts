@@ -1,9 +1,8 @@
-import { app, globalShortcut } from "electron";
+import { app, ipcMain, shell } from "electron";
 import serve from "electron-serve";
-import { baseUrl, createWindow } from "./helpers";
-import { ipcMain, shell } from "electron";
+import { baseUrl, createWindow, isProd } from "./helpers";
 import hotKeyManager from "./helpers/hotkeys";
-const isProd: boolean = process.env.NODE_ENV === "production";
+import { appPath, getMessages, writeMessages } from "./helpers/message-saving";
 
 const focus = () => hotKeyManager.focusCallback();
 const unfocus = () => hotKeyManager.unfocusCallback();
@@ -80,6 +79,15 @@ ipcMain.on("clear-hotkeys", () => {
 
 ipcMain.on("reset-hotkeys", () => {
 	resetHotkeys();
+});
+
+ipcMain.on("getMessages", async (event, channelName) => {
+	event.reply("sendMessages", await getMessages(channelName));
+});
+
+ipcMain.on("writeMessage", async (event, channelName, message) => {
+	const oldMessages = await getMessages(channelName);
+	await writeMessages(channelName, [...oldMessages, message]);
 });
 
 app.on("window-all-closed", () => {
