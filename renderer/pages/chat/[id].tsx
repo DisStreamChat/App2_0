@@ -16,7 +16,7 @@ import { ipcRenderer } from "electron";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
-`;
+`
 
 const Chat = () => {
 	const router = useRouter();
