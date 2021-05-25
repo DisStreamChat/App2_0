@@ -2,14 +2,19 @@ import { useEffect, useRef } from "react";
 import io from "socket.io-client";
 
 const useSocket = (...args): any => {
-	if (typeof window === "undefined") return [{}];
-	const { current: socket } = useRef(io(...args));
+	if (typeof window === "undefined") return {};
+	const socketRef = useRef<any>(null);
+	const { current: socket } = socketRef;
+	useEffect(() => {
+		socketRef.current = io(...args);
+	}, []);
+
 	useEffect(() => {
 		return () => {
-			socket && socket.close();
+			socketRef.current && socketRef.current?.close?.();
 		};
-	}, [socket]);
-	return [socket];
+	}, []);
+	return socket;
 };
 
 export default useSocket;

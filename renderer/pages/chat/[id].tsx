@@ -16,20 +16,20 @@ import { ipcRenderer } from "electron";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
-`
+`;
 
 const Chat = () => {
 	const router = useRouter();
 	const id = router.query.id as string;
-	const [socket] = useSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
-		transports: ["websocket"],
+	const socket = useSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
 		reconnect: true,
+		transports: ["websocket"]
 	});
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const { tabChannels, savedChannels } = useContext(AppContext);
 
-	useSocketEvent(socket, "imConnected", () => {
+	useSocketEvent(socket, "connect", () => {
 		if (channel) {
 			socket.emit("add", channel);
 		}
@@ -73,6 +73,7 @@ const Chat = () => {
 	}, [channel, socket]);
 
 	useSocketEvent(socket, "chatmessage", msg => {
+		console.log(msg)
 		const transformedMessage = {
 			content: msg.body,
 			id: msg.id,
