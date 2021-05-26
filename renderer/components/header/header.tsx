@@ -15,6 +15,7 @@ const Header = () => {
 	const router = useRouter();
 
 	const chatHeader = router.asPath.includes("chat");
+	const initial = router.asPath.includes("initial");
 	const { id: chatId } = router.query;
 
 	useEffect(() => {
@@ -28,6 +29,7 @@ const Header = () => {
 	}, [chatId]);
 
 	const twitchUrl = `https://twitch.tv/${chatUser.display_name?.toLowerCase()}`;
+	if (initial) return <></>;
 
 	return (
 		<HeaderBody>
@@ -47,7 +49,7 @@ const Header = () => {
 					</div>
 				)}
 				<div>
-					<Link href="/channels" prefetch>
+					<Link href="/channels">
 						<a>
 							<ClearButton>
 								<HomeIcon />

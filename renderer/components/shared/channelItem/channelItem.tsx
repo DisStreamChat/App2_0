@@ -66,8 +66,6 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 
 	const isSmall = useMediaQuery("(max-width: 750px)");
 
-	console.log(isSmall);
-
 	const getLive = useCallback(async () => {
 		if (channelName) {
 			const ApiUrl = `${

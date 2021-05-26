@@ -18,25 +18,7 @@ if (isProd) {
 	app.setPath("userData", `${app.getPath("userData")} (development)`);
 }
 
-(async () => {
-	await app.whenReady();
-
-	app.on("web-contents-created", (e, contents) => {
-		contents.on("will-navigate", (event, url) => {
-			if (url.includes("localhost") || url.includes("https://id.twitch.tv/oauth2/authorize"))
-				return;
-			event.preventDefault();
-			shell.openExternal(url);
-			console.log("blocked navigate:", url);
-		});
-		contents.on("new-window", (event, url) => {
-			if (url.includes("localhost")) return;
-			event.preventDefault();
-			shell.openExternal(url);
-			console.log("blocked window:", url);
-		});
-	});
-
+const startMainWindow = () => {
 	const mainWindow = createWindow("main", {
 		width: 1000,
 		height: 600,
@@ -51,6 +33,40 @@ if (isProd) {
 	});
 
 	mainWindow.loadURL(baseUrl("auth"));
+};
+let loadingWindow;
+(async () => {
+	await app.whenReady();
+
+	app.on("web-contents-created", (e, contents) => {
+		contents.on("will-navigate", (event, url) => {
+			if (url.includes("localhost") || url.includes("https://id.twitch.tv/oauth2/authorize")) return;
+			event.preventDefault();
+			shell.openExternal(url);
+			console.log("blocked navigate:", url);
+		});
+		contents.on("new-window", (event, url) => {
+			if (url.includes("localhost")) return;
+			event.preventDefault();
+			shell.openExternal(url);
+			console.log("blocked window:", url);
+		});
+	});
+
+	loadingWindow = createWindow("loading", {
+		width: 300,
+		height: 300,
+		maxHeight: 300,
+		maxWidth: 300,
+		minHeight: 300,
+		minWidth: 300,
+		alwaysOnTop: true,
+		transparent: false,
+		backgroundColor: "#2a2c30",
+		// frame: false,
+	});
+
+	loadingWindow.loadURL(baseUrl("initial"));
 
 	resetHotkeys();
 })();
@@ -88,6 +104,13 @@ ipcMain.on("getMessages", async (event, channelName) => {
 ipcMain.on("writeMessage", async (event, channelName, message) => {
 	const oldMessages = await getMessages(channelName);
 	await writeMessages(channelName, [...oldMessages, message]);
+});
+
+ipcMain.once("app-ready", () => {
+	startMainWindow();
+	setTimeout(() => {
+		loadingWindow.close();
+	}, 500);
 });
 
 app.on("window-all-closed", () => {

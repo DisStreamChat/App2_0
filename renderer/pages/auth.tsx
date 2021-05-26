@@ -137,7 +137,7 @@ const AuthPage = () => {
 						<label htmlFor="terms-check">
 							I accept the{" "}
 							<a
-								href="https://disstreamchat.com/#/terms"
+								href="https://disstreamchat.com/terms"
 								target="_blank"
 								rel="noopener noreferrer"
 							>
@@ -145,7 +145,7 @@ const AuthPage = () => {
 							</a>{" "}
 							and{" "}
 							<a
-								href="https://disstreamchat.com/#/privacy"
+								href="https://disstreamchat.com/privacy"
 								target="_blank"
 								rel="noopener noreferrer"
 							>

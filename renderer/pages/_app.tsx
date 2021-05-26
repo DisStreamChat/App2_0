@@ -22,9 +22,10 @@ const Border = styled.div`
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
 
+	const router = useRouter();
 	useEffect(() => {
 		(async () => {
-			if (typeof window !== "undefined") {
+			if (typeof window !== "undefined" && !router.asPath.includes("initial")) {
 				if (document.querySelector(".titlebar")) return;
 				const customTitlebar = await import("custom-electron-titlebar");
 				let MyTitleBar = new customTitlebar.Titlebar({
@@ -38,7 +39,6 @@ function MyApp({ Component, pageProps }) {
 		})();
 	}, []);
 
-	const router = useRouter();
 
 	const currentWindow = remote?.getCurrentWindow?.();
 
@@ -96,7 +96,7 @@ function MyApp({ Component, pageProps }) {
 			<GlobalStyle />
 			<AuthContextProvider>
 				<AppContextProvider>
-					{!router.asPath.includes("settings") && windowFocused && <Border />}
+					{!router.asPath.includes("settings") && !router.asPath.includes("initial") && windowFocused && <Border />}
 					{!router.asPath.includes("auth") && !router.asPath.includes("settings") && (
 						<Header />
 					)}
