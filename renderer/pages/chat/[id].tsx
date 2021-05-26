@@ -11,11 +11,20 @@ import { AppContext } from "../../contexts/appContext";
 import Link from "next/link";
 import styled from "styled-components";
 import { TabContainer, Tab } from "../../styles/chat.style";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { ipcRenderer } from "electron";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
+`;
+
+const ChatContainer = styled.div`
+	height: calc(100vh - 95px - 28px);
+	overflow-x: hidden;
+	::-webkit-scrollbar {
+		width: .25rem;
+		border-radius: 100px;
+	}
+	margin-right: .15rem;
 `;
 
 const Chat = () => {
@@ -23,7 +32,7 @@ const Chat = () => {
 	const id = router.query.id as string;
 	const socket = useSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
 		reconnect: true,
-		transports: ["websocket"]
+		transports: ["websocket"],
 	});
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
@@ -34,6 +43,12 @@ const Chat = () => {
 			socket.emit("add", channel);
 		}
 	});
+
+	useEffect(() => {
+		return () => {
+			setMessages([]);
+		};
+	}, [id]);
 
 	useEffect(() => {
 		(async () => {
@@ -73,7 +88,7 @@ const Chat = () => {
 	}, [channel, socket]);
 
 	useSocketEvent(socket, "chatmessage", msg => {
-		console.log(msg)
+		console.log(msg);
 		const transformedMessage = {
 			content: msg.body,
 			id: msg.id,
@@ -90,22 +105,26 @@ const Chat = () => {
 	});
 
 	return (
-		<ChatMain>
-			<TabContainer>
-				{tabChannels.map(channel => (
-					<Tab className={`${id === channel.id ? "active" : ""}`}>
-						<Link href={`/chat/${channel.id}`}>
-							<a>{channel.name}</a>
-						</Link>
-					</Tab>
-				))}
-			</TabContainer>
-			<MessageList>
-				{messages.map(msg => (
-					<Message {...msg}></Message>
-				))}
-			</MessageList>
-		</ChatMain>
+		<>
+			<ChatMain>
+				<TabContainer>
+					{tabChannels.map(channel => (
+						<Tab className={`${id === channel.id ? "active" : ""}`}>
+							<Link href={`/chat/${channel.id}`}>
+								<a>{channel.name}</a>
+							</Link>
+						</Tab>
+					))}
+				</TabContainer>
+				<ChatContainer>
+					<MessageList>
+						{messages.map(msg => (
+							<Message {...msg}></Message>
+						))}
+					</MessageList>
+				</ChatContainer>
+			</ChatMain>
+		</>
 	);
 };
 

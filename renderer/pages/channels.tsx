@@ -5,12 +5,7 @@ import { authContext } from "../contexts/authContext";
 import { ChannelMain, ModChannels } from "../styles/channels.styles";
 import firebaseClient from "../firebase/client";
 import { ChannelModel } from "../models/channel.model";
-import Reorder, {
-	reorder,
-	reorderImmutable,
-	reorderFromTo,
-	reorderFromToImmutable,
-} from "react-reorder";
+import Reorder, { reorder, reorderImmutable, reorderFromTo, reorderFromToImmutable } from "react-reorder";
 
 const Channels = () => {
 	const { savedChannels, setSavedChannels, setTabChannels } = useContext(AppContext);
@@ -32,9 +27,7 @@ const Channels = () => {
 			setSavedChannels(channels);
 			setTabChannels(
 				channels.filter(channel =>
-					["cozycoding", "Kitboga", "SaintPlaysThings", "CodingGarden"].includes(
-						channel.name
-					)
+					["cozycoding", "Kitboga", "SaintPlaysThings", "CodingGarden"].includes(channel.name)
 				)
 			);
 		})();
@@ -68,8 +61,8 @@ const Channels = () => {
 				disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
 			>
 				{savedChannels.map(channel => (
-					<div key={channel.id} className="">
-						<ChannelItem {...channel} passKey={channel.id} key={channel.id} />
+					<div style={{ width: "95%" }} key={channel.id} className="">
+						<ChannelItem large {...channel} passKey={channel.id} key={channel.id} />
 					</div>
 				))}
 			</Reorder>

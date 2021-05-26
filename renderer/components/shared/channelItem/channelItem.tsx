@@ -13,11 +13,13 @@ import {
 	ChannelSearchBody,
 	ChannelSearchSection,
 } from "./channelItem.style";
-import { OrangeButton, PurpleButton, RedButton, TwitchButton } from "../../../styles/button.styles";
+import { OrangeButton, RedButton } from "../../../styles/button.styles";
 import { AppContext } from "../../../contexts/appContext";
+import { useMediaQuery } from "@material-ui/core";
 interface ChannelProps extends ChannelModel {
 	isOwned?: boolean;
-	passKey?: any
+	passKey?: any;
+	large?: boolean;
 }
 
 export const ChannelSearchItem = React.memo(() => {
@@ -29,17 +31,12 @@ export const ChannelSearchItem = React.memo(() => {
 	const submit = async e => {
 		e.preventDefault();
 		console.log(search);
-		const response = await fetch(
-			`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`
-		);
+		const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`);
 		const json = await response.json();
 		if (json.exists) {
 			const { data } = json;
 			const { profile_image_url, display_name, id } = data;
-			setSavedChannels(prev => [
-				...prev,
-				{ name: display_name, avatar: profile_image_url, id },
-			]);
+			setSavedChannels(prev => [...prev, { name: display_name, avatar: profile_image_url, id }]);
 		}
 		resetSearch();
 	};
@@ -66,6 +63,10 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [loading, setLoading] = useState(false);
 	const [isLive, setIsLive] = useState(false);
 	const { user } = useContext(authContext);
+
+	const isSmall = useMediaQuery("(max-width: 750px)");
+
+	console.log(isSmall);
 
 	const getLive = useCallback(async () => {
 		if (channelName) {
@@ -128,8 +129,7 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 						const json = await res.json();
 						if (json) {
 							const ModChannels = [...user.ModChannels, json].filter(
-								(thing, index, self) =>
-									index === self.findIndex(t => t.id === thing.id)
+								(thing, index, self) => index === self.findIndex(t => t.id === thing.id)
 							);
 							await firebaseClient.db.collection("Streamers").doc(user.uid).update({
 								ModChannels,
@@ -140,9 +140,7 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 					}
 				}
 			} catch (err) {
-				setError(
-					`An error occured while fetching ${channelName}, make sure you entered the name correctly`
-				);
+				setError(`An error occured while fetching ${channelName}, make sure you entered the name correctly`);
 			}
 			setChannelName("");
 			setLoading(false);
@@ -150,9 +148,8 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 		[channelName, user?.uid, user]
 	);
 
-
 	return (
-		<ChannelItemBody ref={ref} key={props.passKey}>
+		<ChannelItemBody style={props.large ? { width: "100%" } : {}} ref={ref} key={props.passKey}>
 			<ChannelProfilePicture live={isLive}>
 				<img src={props["profile_image_url"] || props.avatar} alt="" />
 			</ChannelProfilePicture>
@@ -161,24 +158,20 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 				<ChannelButtons>
 					<Link href={`/chat/${props.id}`}>
 						<a className="dashboard-link">
-							<OrangeButton className="to-dashboard dashboard-button">
-								Go To Chat
-							</OrangeButton>
+							<OrangeButton className="to-dashboard dashboard-button">Go To Chat</OrangeButton>
 						</a>
 					</Link>
-					<Link href={`/chat/${props.id}`}>
-						<a className="dashboard-link">
-							<OrangeButton className="to-dashboard dashboard-button">
-								Go To Chat
-							</OrangeButton>
-						</a>
-					</Link>
+					{!isSmall && (
+						<Link href={`/chat/${props.id}`}>
+							<a className="dashboard-link">
+								<OrangeButton className="to-dashboard dashboard-button">Open in Popout</OrangeButton>
+							</a>
+						</Link>
+					)}
 					{!props.isOwned && (
 						<Link href={`/chat/${props.id}`}>
 							<a className="dashboard-link">
-								<RedButton className="to-dashboard dashboard-button">
-									Go To Chat
-								</RedButton>
+								<RedButton className="to-dashboard dashboard-button">Remove</RedButton>
 							</a>
 						</Link>
 					)}

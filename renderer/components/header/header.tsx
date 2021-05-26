@@ -7,7 +7,7 @@ import firebaseClient from "../../firebase/client";
 import { TwitchUserModel } from "../../models/user.model";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HomeIcon from "@material-ui/icons/Home";
-import { Link } from "@material-ui/core";
+import Link from "next/link";
 const { ipcRenderer } = require("electron");
 
 const Header = () => {
@@ -47,7 +47,7 @@ const Header = () => {
 					</div>
 				)}
 				<div>
-					<Link href="/channels">
+					<Link href="/channels" prefetch>
 						<a>
 							<ClearButton>
 								<HomeIcon />

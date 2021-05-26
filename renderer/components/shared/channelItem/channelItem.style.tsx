@@ -13,7 +13,7 @@ export const ChannelItemBody = styled.div`
 	animation: fade-in 0.5s ease-in-out forwards;
 	padding: 1rem 0;
 	
-	@media screen and (max-width: 775px) {
+	@media screen and (max-width: 800px) {
 		&,
 		& * {
 			font-size: 0.75rem !important;
@@ -26,7 +26,7 @@ export const ChannelItemBody = styled.div`
 			font-size: 0.6rem !important;
 		}
 		button * {
-			font-size: 0.75rem !important;
+			font-size: 0.7rem !important;
 		}
 	}
 `;
