@@ -11,24 +11,6 @@ const Channels = () => {
 	const { savedChannels, setSavedChannels, setTabChannels } = useContext(AppContext);
 	const { user } = useContext(authContext);
 
-	useEffect(() => {
-		(async () => {
-			if (!user) return;
-			const docRef = firebaseClient.db.collection("Streamers").doc(user.uid);
-			const doc = await docRef.get();
-			const data = doc.data();
-			const { ModChannels } = data;
-			const channels: ChannelModel[] = (ModChannels as any[]).map((channel, i) => ({
-				name: channel.display_name,
-				avatar: channel.profile_image_url,
-				id: channel.id,
-				order: channel.order || i - 1,
-				...channel,
-			}));
-			setSavedChannels(channels.sort((a, b) => a.order - b.order));
-		})();
-	}, [user]);
-
 	const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
 		setSavedChannels(prev => {
 			prev[previousIndex].order = nextIndex;

@@ -111,6 +111,17 @@ const GlobalStyle = createGlobalStyle`
 	.container-after-titlebar {
 		overflow: hidden !important;
 	}
+	.add-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: .25rem;
+		transition: background .25s;
+		padding: .25rem;
+		&:hover {
+			background: #21212121;
+		}
+	}
 `;
 
 export default GlobalStyle;
