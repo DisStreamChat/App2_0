@@ -183,7 +183,7 @@ const Chat = () => {
 					{
 						<TabContainer exit={{ height: 0 }}>
 							{tabChannels.map(channel => (
-								<Tab className={`${id === channel.id ? "active" : ""}`}>
+								<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`}>
 									<Link href={`/chat/${channel.id}`}>
 										<a>{channel.name}</a>
 									</Link>
@@ -237,7 +237,7 @@ const Chat = () => {
 				<ChatContainer>
 					<MessageList>
 						{messages.map(msg => (
-							<Message {...msg}></Message>
+							<Message {...msg} key={msg.id}></Message>
 						))}
 					</MessageList>
 				</ChatContainer>
