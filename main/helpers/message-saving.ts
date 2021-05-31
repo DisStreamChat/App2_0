@@ -1,5 +1,6 @@
 import fs, { promises } from "fs";
 import path from "path";
+import { TabModel } from "../../models/tab.model";
 
 export const appPath = () => {
 	switch (process.platform) {
@@ -15,18 +16,31 @@ export const appPath = () => {
 	}
 };
 
-export const MESSAGES_FILE_PATH = "disstreamchat/messages/";
+export enum FilePath {
+	MESSAGES = "disstreamchat/messages",
+	TABS = "disstreamchat/tabs"
+}
 
-export const getMessageFileName = async (channelName: string) => {
-	const fullPath = path.join(MESSAGES_FILE_PATH, `${channelName}.json`);
-	const messagePath = path.join(appPath(), MESSAGES_FILE_PATH);
+
+export const getFileName = async (prefix: FilePath, channelName: string) => {
+	const fullPath = path.join(prefix, `${channelName}.json`);
+	const messagePath = path.join(appPath(), prefix);
 	if (!fs.existsSync(messagePath)) {
 		console.log("creating directory");
 		await promises.mkdir(messagePath, { recursive: true });
 		await promises.writeFile(fullPath, "");
 	}
 	return fullPath;
+}
+
+export const getMessageFileName = async (channelName: string) => {
+	return getFileName(FilePath.MESSAGES, channelName)
 };
+
+export const getTabFileName = async (channelName: string) => {
+	return getFileName(FilePath.TABS, channelName)
+
+}
 
 export const writeToFile = async (fileName, inData) => {
 	const fullPath = path.join(appPath(), "\\", fileName);
@@ -41,5 +55,9 @@ export const getMessages = async (channelName: string) => {
 };
 
 export const writeMessages = async (channelName: string, messages: any[]) => {
+	writeToFile(await getMessageFileName(channelName), JSON.stringify(messages));
+};
+
+export const writeTabs = async (channelName: string, tabs: TabModel[]) => {
 	writeToFile(await getMessageFileName(channelName), JSON.stringify(messages));
 };
