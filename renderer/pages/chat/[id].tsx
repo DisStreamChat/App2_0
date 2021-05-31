@@ -12,6 +12,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { TabContainer, Tab } from "../../styles/chat.style";
 import { ipcRenderer } from "electron";
+import { useSocketContext } from "../../contexts/socketContext";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -21,19 +22,16 @@ const ChatContainer = styled.div`
 	height: calc(100vh - 95px - 28px);
 	overflow-x: hidden;
 	::-webkit-scrollbar {
-		width: .25rem;
+		width: 0.25rem;
 		border-radius: 100px;
 	}
-	margin-right: .15rem;
+	margin-right: 0.15rem;
 `;
 
 const Chat = () => {
 	const router = useRouter();
 	const id = router.query.id as string;
-	const socket = useSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
-		reconnect: true,
-		transports: ["websocket"],
-	});
+	const { socket } = useSocketContext();
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const { tabChannels, savedChannels } = useContext(AppContext);

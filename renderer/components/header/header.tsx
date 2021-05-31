@@ -8,10 +8,12 @@ import { TwitchUserModel } from "../../models/user.model";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HomeIcon from "@material-ui/icons/Home";
 import Link from "next/link";
+import { useSocketContext } from "../../contexts/socketContext";
 const { ipcRenderer } = require("electron");
 
 const Header = () => {
 	const [chatUser, setChatUser] = useState<TwitchUserModel>({} as TwitchUserModel);
+	const { socket } = useSocketContext();
 	const router = useRouter();
 
 	const chatHeader = router.asPath.includes("chat");
@@ -45,7 +47,12 @@ const Header = () => {
 					</PurpleButton>
 				) : (
 					<div>
-						<a href={twitchUrl}>{chatUser.display_name}</a>
+						<a
+							href={twitchUrl}
+							target="_blank"
+						>
+							{chatUser.display_name}
+						</a>
 					</div>
 				)}
 				<div>

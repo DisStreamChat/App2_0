@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { remote } from "electron";
 import { AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
+import { SocketContextProvider } from "../contexts/socketContext";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -38,7 +39,6 @@ function MyApp({ Component, pageProps }) {
 			}
 		})();
 	}, []);
-
 
 	const currentWindow = remote?.getCurrentWindow?.();
 
@@ -74,10 +74,7 @@ function MyApp({ Component, pageProps }) {
 					href="https://cdn.jsdelivr.net/gh//GypsyDangerous/simple-css-reset/reset.css"
 					as="style"
 				/>
-				<link
-					rel="stylesheet"
-					href="https://cdn.jsdelivr.net/gh//GypsyDangerous/simple-css-reset/reset.css"
-				/>
+				<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh//GypsyDangerous/simple-css-reset/reset.css" />
 				<link
 					rel="stylesheet"
 					href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.css"
@@ -95,13 +92,15 @@ function MyApp({ Component, pageProps }) {
 			</Head>
 			<GlobalStyle />
 			<AuthContextProvider>
-				<AppContextProvider>
-					{!router.asPath.includes("settings") && !router.asPath.includes("initial") && windowFocused && <Border />}
-					{!router.asPath.includes("auth") && !router.asPath.includes("settings") && (
-						<Header />
-					)}
-					<Component {...pageProps} />
-				</AppContextProvider>
+				<SocketContextProvider>
+					<AppContextProvider>
+						{!router.asPath.includes("settings") && !router.asPath.includes("initial") && windowFocused && (
+							<Border />
+						)}
+						{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
+						<Component {...pageProps} />
+					</AppContextProvider>
+				</SocketContextProvider>
 			</AuthContextProvider>
 		</>
 	);
