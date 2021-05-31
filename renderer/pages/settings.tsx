@@ -79,27 +79,47 @@ const SettingsMain = styled.div`
 	padding: 0 2rem;
 `;
 
+const SearchContainer = styled.div`
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	display: grid;
+	place-items: center;
+	& > span {
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		input {
+			margin-left: 1.5rem !important;
+		}
+	}
+`;
+
 const Home = ({ settings: defaultSettings }) => {
 	const [search, setSearch] = useState("");
 	const { user } = useAuth();
 
-	const allSettings: Setting[] = Object.entries(defaultSettings || {})
-		.map(([key, val]: [string, any]) => ({
-			...val,
-			name: key,
-		}))
-		.sort((a, b) => {
-			const categoryOrder = a.type.localeCompare(b.type);
-			const nameOrder = a.name.localeCompare(b.name);
-			return !!categoryOrder ? categoryOrder : nameOrder;
-		})
-		.filter(setting => {
-			return setting.name
-				.match(/[A-Z][a-z]+|[0-9]+/g)
-				.join(" ")
-				.toLowerCase()
-				.includes(search.toLowerCase());
-		});
+	const allSettings: Setting[] = useMemo(
+		() =>
+			Object.entries(defaultSettings || {})
+				.map(([key, val]: [string, any]) => ({
+					...val,
+					name: key,
+				}))
+				.sort((a, b) => {
+					const categoryOrder = a.type.localeCompare(b.type);
+					const nameOrder = a.name.localeCompare(b.name);
+					return !!categoryOrder ? categoryOrder : nameOrder;
+				})
+				.filter(setting => {
+					return setting.name
+						.match(/[A-Z][a-z]+|[0-9]+/g)
+						.join(" ")
+						.toLowerCase()
+						.includes(search.toLowerCase());
+				}),
+		[search]
+	);
 	const [openItem, setOpenItem] = useState(null);
 	const [state, dispatch] = useReducer(settingReducer, {});
 
@@ -114,8 +134,24 @@ const Home = ({ settings: defaultSettings }) => {
 
 	const changed = appSettings && !isEqual(appSettings, state);
 
+	const save = async () => {
+		firebaseClient.db.collection("Streamers").doc(user.uid).set(
+			{
+				appSettings: state,
+			},
+			{ merge: true }
+		);
+	};
+
 	return (
 		<SettingsMain>
+			<SearchContainer>
+				<SearchBox
+					search={search}
+					onChange={val => setSearch(val)}
+					resetSearch={() => setSearch("")}
+				></SearchBox>
+			</SearchContainer>
 			<Settings>
 				{allSettings.map(setting => (
 					<SettingComponent
@@ -136,7 +172,13 @@ const Home = ({ settings: defaultSettings }) => {
 					></SettingComponent>
 				))}
 			</Settings>
-			<SaveBar changed={changed} save={() => {}} reset={() => {}}></SaveBar>
+			<SaveBar
+				changed={changed}
+				save={save}
+				reset={() => {
+					dispatch({ type: Actions.SET, value: appSettings });
+				}}
+			/>
 		</SettingsMain>
 	);
 };
