@@ -19,9 +19,10 @@ export const MESSAGES_FILE_PATH = "disstreamchat/messages/";
 
 export const getMessageFileName = async (channelName: string) => {
 	const fullPath = path.join(MESSAGES_FILE_PATH, `${channelName}.json`);
-	if (!fs.existsSync(MESSAGES_FILE_PATH)) {
+	const messagePath = path.join(appPath(), MESSAGES_FILE_PATH);
+	if (!fs.existsSync(messagePath)) {
 		console.log("creating directory");
-		await promises.mkdir(MESSAGES_FILE_PATH, { recursive: true });
+		await promises.mkdir(messagePath, { recursive: true });
 		await promises.writeFile(fullPath, "");
 	}
 	return fullPath;
@@ -33,12 +34,9 @@ export const writeToFile = async (fileName, inData) => {
 };
 
 export const getMessages = async (channelName: string) => {
-	const messagePath = path.join(appPath(), "\\", await getMessageFileName(channelName))
-	if(!fs.existsSync(messagePath)) return []
-	const messages = await promises.readFile(
-		messagePath,
-		"utf-8"
-	);
+	const messagePath = path.join(appPath(), "\\", await getMessageFileName(channelName));
+	if (!fs.existsSync(messagePath)) return [];
+	const messages = await promises.readFile(messagePath, "utf-8");
 	return JSON.parse(messages || "[]");
 };
 
