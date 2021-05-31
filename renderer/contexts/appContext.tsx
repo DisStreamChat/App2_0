@@ -1,5 +1,7 @@
-import React, { createContext, useState } from "react";
+import { ipcRenderer } from "electron";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { ChannelModel } from "../models/channel.model";
+import { authContext } from "./authContext";
 
 export interface AppContextModel {
 	savedChannels: ChannelModel[];
@@ -16,6 +18,18 @@ export const AppContextProvider = props => {
 	const [savedChannels, setSavedChannels] = useState<ChannelModel[]>([]);
 	const [tabChannels, setTabChannels] = useState<ChannelModel[]>([]);
 	const [tabsOpen, setTabsOpen] = useState(false);
+
+	const { user } = useContext(authContext);
+	const uid = user?.uid;
+	console.log(uid)
+	useEffect(() => {
+		if (uid) {
+			ipcRenderer.once("sendTabs", (event, tabs: ChannelModel[]) => {
+				setTabChannels(tabs);
+			});
+			ipcRenderer.send("getTabs", uid);
+		}
+	}, [uid]);
 
 	return (
 		<AppContext.Provider

@@ -2,7 +2,8 @@ import { app, ipcMain, shell } from "electron";
 import serve from "electron-serve";
 import { baseUrl, createWindow, isProd } from "./helpers";
 import hotKeyManager from "./helpers/hotkeys";
-import { appPath, getMessages, writeMessages } from "./helpers/message-saving";
+import { appPath, getMessages, getTabs, writeMessages, writeTabs } from "./helpers/file-saving";
+import { TabModel } from "../models/tab.model";
 
 const focus = () => hotKeyManager.focusCallback();
 const unfocus = () => hotKeyManager.unfocusCallback();
@@ -95,6 +96,14 @@ ipcMain.on("clear-hotkeys", () => {
 
 ipcMain.on("reset-hotkeys", () => {
 	resetHotkeys();
+});
+
+ipcMain.on("writeTabs", async (event, channelName, tabs: TabModel[]) => {
+	await writeTabs(channelName, tabs);
+});
+
+ipcMain.on("getTabs", async (event, channelName) => {
+	event.reply("sendTabs", await getTabs(channelName));
 });
 
 ipcMain.on("getMessages", async (event, channelName) => {

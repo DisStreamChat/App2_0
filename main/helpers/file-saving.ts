@@ -28,7 +28,7 @@ export const getFileName = async (prefix: FilePath, channelName: string) => {
 	if (!fs.existsSync(messagePath)) {
 		console.log("creating directory");
 		await promises.mkdir(messagePath, { recursive: true });
-		await promises.writeFile(fullPath, "");
+		// await promises.writeFile(fullPath, "");
 	}
 	return fullPath;
 }
@@ -42,22 +42,30 @@ export const getTabFileName = async (channelName: string) => {
 
 }
 
-export const writeToFile = async (fileName, inData) => {
+export const writeToFile = async (fileName: string, inData: string) => {
 	const fullPath = path.join(appPath(), "\\", fileName);
 	await promises.writeFile(fullPath, inData);
 };
 
-export const getMessages = async (channelName: string) => {
-	const messagePath = path.join(appPath(), "\\", await getMessageFileName(channelName));
-	if (!fs.existsSync(messagePath)) return [];
-	const messages = await promises.readFile(messagePath, "utf-8");
+export const readFile = async (filename: string) => {
+	const filePath = path.join(appPath(), "\\", filename);
+	if (!fs.existsSync(filePath)) return [];
+	const messages = await promises.readFile(filePath, "utf-8");
 	return JSON.parse(messages || "[]");
+}
+
+export const getMessages = async (channelName: string) => {
+	return readFile(await getMessageFileName(channelName))
 };
+
+export const getTabs = async (channelName: string): Promise<TabModel[]> => {
+	return readFile(await getTabFileName(channelName))
+}
 
 export const writeMessages = async (channelName: string, messages: any[]) => {
 	writeToFile(await getMessageFileName(channelName), JSON.stringify(messages));
 };
 
 export const writeTabs = async (channelName: string, tabs: TabModel[]) => {
-	writeToFile(await getMessageFileName(channelName), JSON.stringify(messages));
+	writeToFile(await getTabFileName(channelName), JSON.stringify(tabs));
 };

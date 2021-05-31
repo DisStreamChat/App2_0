@@ -25,11 +25,6 @@ const Channels = () => {
 			}));
 			console.log(channels);
 			setSavedChannels(channels);
-			setTabChannels(
-				channels.filter(channel =>
-					["cozycoding", "Kitboga", "SaintPlaysThings", "CodingGarden"].includes(channel.name)
-				)
-			);
 		})();
 	}, [user]);
 
