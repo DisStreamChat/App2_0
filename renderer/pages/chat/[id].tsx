@@ -59,9 +59,19 @@ const Chat = () => {
 				const firebaseId = sha1(id);
 				const docRef = firebaseClient.db.collection("Streamers").doc(firebaseId);
 				const doc = await docRef.get();
-				const data = doc.data();
-				const { guildId, liveChatId, TwitchName: twitchName } = data;
-				setChannel({ guildId, liveChatId, twitchName });
+				if (doc.exists) {
+					const data = doc.data();
+					const { guildId, liveChatId, TwitchName: twitchName } = data;
+					setChannel({ guildId, liveChatId, twitchName });
+				} else {
+					const response = await fetch(
+						`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${id}`
+					);
+					const json = await response.json();
+					console.log(json);
+					const { data } = json;
+					setChannel({ twitchName: data.login });
+				}
 			} catch (err) {
 				console.log(err.message);
 			}
