@@ -16,7 +16,8 @@ import {
 import { OrangeButton, RedButton } from "../../../styles/button.styles";
 import { AppContext } from "../../../contexts/appContext";
 import { useMediaQuery } from "@material-ui/core";
-interface ChannelProps extends ChannelModel {
+import { useRouter } from "next/router";
+interface ChannelProps extends Omit<ChannelModel, "order"> {
 	isOwned?: boolean;
 	passKey?: any;
 	large?: boolean;
@@ -25,6 +26,8 @@ interface ChannelProps extends ChannelModel {
 export const ChannelSearchItem = React.memo(() => {
 	const [search, setSearch] = useState("");
 	const { setSavedChannels } = useContext(AppContext);
+	const { user } = useContext(authContext);
+	const router = useRouter();
 
 	const resetSearch = () => setSearch("");
 
@@ -36,7 +39,12 @@ export const ChannelSearchItem = React.memo(() => {
 		if (json.exists) {
 			const { data } = json;
 			const { profile_image_url, display_name, id } = data;
-			setSavedChannels(prev => [...prev, { name: display_name, avatar: profile_image_url, id }]);
+			setSavedChannels(prev => {
+				if (prev.find(channel => channel.id === id)) return prev;
+				const newList = [...prev, { name: display_name, avatar: profile_image_url, id, order: Infinity }];
+				firebaseClient.db.collection("Streamers").doc(user.uid).update({ ModChannels: newList });
+				return newList;
+			});
 		}
 		resetSearch();
 	};
@@ -63,6 +71,7 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [loading, setLoading] = useState(false);
 	const [isLive, setIsLive] = useState(false);
 	const { user } = useContext(authContext);
+	const { setSavedChannels } = useContext(AppContext);
 
 	const isSmall = useMediaQuery("(max-width: 750px)");
 
@@ -83,11 +92,14 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 
 	const removeChannel = useCallback(async () => {
 		const userRef = firebaseClient.db.collection("Streamers").doc(user.uid);
-		const modChannels = user.savedChannels;
-		const newModChannels = modChannels.filter(channel => channel.id !== props.id);
-		await userRef.update({
-			ModChannels: newModChannels,
-			removedChannels: firebaseClient.append(props.id),
+		setSavedChannels(prev => {
+			const modChannels = prev;
+			const newModChannels = modChannels.filter(channel => channel.id !== props.id);
+			userRef.update({
+				ModChannels: newModChannels,
+				removedChannels: firebaseClient.append(props.id),
+			});
+			return newModChannels;
 		});
 	}, [user, props, user]);
 
@@ -167,11 +179,9 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 						</Link>
 					)}
 					{!props.isOwned && (
-						<Link href={`/chat/${props.id}`}>
-							<a className="dashboard-link">
-								<RedButton className="to-dashboard dashboard-button">Remove</RedButton>
-							</a>
-						</Link>
+						<RedButton onClick={removeChannel} className="to-dashboard dashboard-button">
+							Remove
+						</RedButton>
 					)}
 				</ChannelButtons>
 			</ChannelInfo>

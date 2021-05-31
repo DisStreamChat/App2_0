@@ -1,5 +1,6 @@
 export interface ChannelModel {
 	id: string,
 	name: string,
-	avatar: string
+	avatar: string,
+	order: number
 }

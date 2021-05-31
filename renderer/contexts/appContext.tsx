@@ -21,7 +21,6 @@ export const AppContextProvider = props => {
 
 	const { user } = useContext(authContext);
 	const uid = user?.uid;
-	console.log(uid)
 	useEffect(() => {
 		if (uid) {
 			ipcRenderer.once("sendTabs", (event, tabs: ChannelModel[]) => {

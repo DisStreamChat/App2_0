@@ -16,21 +16,27 @@ const Channels = () => {
 			if (!user) return;
 			const docRef = firebaseClient.db.collection("Streamers").doc(user.uid);
 			const doc = await docRef.get();
-			const data = await doc.data();
+			const data = doc.data();
 			const { ModChannels } = data;
-			const channels: ChannelModel[] = ModChannels.map(channel => ({
+			const channels: ChannelModel[] = (ModChannels as any[]).map((channel, i) => ({
 				name: channel.display_name,
 				avatar: channel.profile_image_url,
 				id: channel.id,
+				order: channel.order || i - 1,
+				...channel,
 			}));
-			console.log(channels);
-			setSavedChannels(channels);
+			setSavedChannels(channels.sort((a, b) => a.order - b.order));
 		})();
 	}, [user]);
 
 	const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
-		console.log(previousIndex, nextIndex);
-		setSavedChannels(prev => reorder(prev, previousIndex, nextIndex));
+		setSavedChannels(prev => {
+			prev[previousIndex].order = nextIndex;
+			prev[nextIndex].order = previousIndex;
+			const newList = reorder(prev, previousIndex, nextIndex);
+			firebaseClient.db.collection("Streamers").doc(user.uid).update({ ModChannels: newList });
+			return newList;
+		});
 	};
 
 	return (
@@ -54,6 +60,7 @@ const Channels = () => {
 				onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
 				autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
 				disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
+				holdTime={200}
 			>
 				{savedChannels.map(channel => (
 					<div style={{ width: "95%" }} key={channel.id} className="">
