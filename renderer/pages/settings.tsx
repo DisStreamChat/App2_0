@@ -1,9 +1,14 @@
-import React, { useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { SearchBox, BooleanSetting, ColorSetting, ListSetting, RangeSetting, SelectSetting } from "disstreamchat-utils";
 import styled from "styled-components";
 import admin from "../firebase/admin";
+import { isEqual } from "lodash";
+import { useDocumentData } from "react-firebase-hooks/firestore";
+import firebaseClient from "../firebase/client";
+import { useAuth } from "../contexts/authContext";
+import { SaveBar } from "../components/shared/ui-components/SaveBar";
 
 interface Setting {
 	category: string;
@@ -70,8 +75,13 @@ const settingReducer = (state, action: Action) => {
 	}
 };
 
+const SettingsMain = styled.div`
+	padding: 0 2rem;
+`;
+
 const Home = ({ settings: defaultSettings }) => {
 	const [search, setSearch] = useState("");
+	const { user } = useAuth();
 
 	const allSettings: Setting[] = Object.entries(defaultSettings || {})
 		.map(([key, val]: [string, any]) => ({
@@ -93,8 +103,19 @@ const Home = ({ settings: defaultSettings }) => {
 	const [openItem, setOpenItem] = useState(null);
 	const [state, dispatch] = useReducer(settingReducer, {});
 
+	const [data, loading, error] = useDocumentData(firebaseClient.db.collection("Streamers").doc(user?.uid));
+
+	const appSettings = data?.appSettings;
+	useEffect(() => {
+		if (appSettings) {
+			dispatch({ type: Actions.SET, value: appSettings });
+		}
+	}, [appSettings]);
+
+	const changed = appSettings && !isEqual(appSettings, state);
+
 	return (
-		<div>
+		<SettingsMain>
 			<Settings>
 				{allSettings.map(setting => (
 					<SettingComponent
@@ -115,7 +136,8 @@ const Home = ({ settings: defaultSettings }) => {
 					></SettingComponent>
 				))}
 			</Settings>
-		</div>
+			<SaveBar changed={changed} save={() => {}} reset={() => {}}></SaveBar>
+		</SettingsMain>
 	);
 };
 

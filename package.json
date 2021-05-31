@@ -22,6 +22,7 @@
     "firebase-admin": "^9.5.0",
     "framer-motion": "^3.3.0",
     "nookies": "^2.5.2",
+    "react-beforeunload": "^2.5.1",
     "react-firebase-hooks": "^3.0.4",
     "react-reorder": "^3.0.0-alpha.7",
     "react-socket-io": "^0.2.0",
