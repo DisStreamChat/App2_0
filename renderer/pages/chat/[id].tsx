@@ -13,6 +13,10 @@ import styled from "styled-components";
 import { TabContainer, Tab } from "../../styles/chat.style";
 import { ipcRenderer } from "electron";
 import { useSocketContext } from "../../contexts/socketContext";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { EmptyButton } from "../../components/shared/ui-components/Buttons";
+import { AnimatePresence } from "framer-motion";
+import CloseIcon from "@material-ui/icons/Close";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -34,7 +38,7 @@ const Chat = () => {
 	const { socket } = useSocketContext();
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
-	const { tabChannels, savedChannels } = useContext(AppContext);
+	const { tabChannels, savedChannels, setTabChannels, tabsOpen, setTabsOpen } = useContext(AppContext);
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
@@ -105,15 +109,27 @@ const Chat = () => {
 	return (
 		<>
 			<ChatMain>
-				<TabContainer>
-					{tabChannels.map(channel => (
-						<Tab className={`${id === channel.id ? "active" : ""}`}>
-							<Link href={`/chat/${channel.id}`}>
-								<a>{channel.name}</a>
-							</Link>
-						</Tab>
-					))}
-				</TabContainer>
+				<AnimatePresence>
+					{
+						<TabContainer exit={{ height: 0 }}>
+							{tabChannels.map(channel => (
+								<Tab className={`${id === channel.id ? "active" : ""}`}>
+									<Link href={`/chat/${channel.id}`}>
+										<a>{channel.name}</a>
+									</Link>
+									<CloseIcon
+										onClick={() => {
+											setTabChannels(prev => prev.filter(c => c.id !== channel.id));
+										}}
+									/>
+								</Tab>
+							))}
+							{/* <EmptyButton>
+								<KeyboardArrowDownIcon></KeyboardArrowDownIcon>
+							</EmptyButton> */}
+						</TabContainer>
+					}
+				</AnimatePresence>
 				<ChatContainer>
 					<MessageList>
 						{messages.map(msg => (

@@ -108,6 +108,9 @@ const GlobalStyle = createGlobalStyle`
 	.placeholder {
 		opacity: .5
 	}
+	.container-after-titlebar {
+		overflow: hidden !important;
+	}
 `;
 
 export default GlobalStyle;
