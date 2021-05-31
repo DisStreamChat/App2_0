@@ -103,60 +103,8 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 		});
 	}, [user, props, user]);
 
-	const pinChannel = useCallback(async () => {
-		const userRef = firebaseClient.db.collection("Streamers").doc(user.uid);
-		await userRef.update({
-			pinnedChannels: firebaseClient.append(props.id),
-		});
-	}, [user, props]);
-
-	const unpinChannel = useCallback(async () => {
-		const userRef = firebaseClient.db.collection("Streamers").doc(user.uid);
-		await userRef.update({
-			pinnedChannels: firebaseClient.remove(props.id),
-		});
-	}, []);
 
 	useInterval(getLive, 60000 * 4);
-
-	const addChannel = useCallback(
-		async e => {
-			e.preventDefault();
-			setError("");
-			try {
-				setLoading(true);
-				if (!channelName) {
-					setError("Missing Channel Name");
-				} else {
-					const userName = user.name;
-					const apiUrl = `${process.env.REACT_APP_SOCKET_URL}/resolveuser?user=${channelName}&platform=twitch`;
-					const res = await fetch(apiUrl);
-					if (!res.ok) {
-						setError(
-							`An error occured while fetching ${channelName}, make sure you entered the name correctly`
-						);
-					} else {
-						const json = await res.json();
-						if (json) {
-							const ModChannels = [...user.ModChannels, json].filter(
-								(thing, index, self) => index === self.findIndex(t => t.id === thing.id)
-							);
-							await firebaseClient.db.collection("Streamers").doc(user.uid).update({
-								ModChannels,
-							});
-						} else {
-							setError("You are not a moderator for " + channelName);
-						}
-					}
-				}
-			} catch (err) {
-				setError(`An error occured while fetching ${channelName}, make sure you entered the name correctly`);
-			}
-			setChannelName("");
-			setLoading(false);
-		},
-		[channelName, user?.uid, user]
-	);
 
 	return (
 		<ChannelItemBody style={props.large ? { width: "100%" } : {}} ref={ref} key={props.passKey}>
