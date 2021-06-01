@@ -1,10 +1,9 @@
 import firebaseClient from "../../../firebase/client";
-import React, { useState, useContext, useEffect, useCallback, forwardRef } from "react";
+import React, { useState, useContext, useCallback, forwardRef } from "react";
 import { SearchBox } from "disstreamchat-utils";
 import Link from "next/link";
 import { ChannelModel } from "../../../models/channel.model";
 import { authContext } from "../../../contexts/authContext";
-import useInterval from "react-use/lib/useInterval";
 import {
 	ChannelButtons,
 	ChannelInfo,
@@ -17,6 +16,7 @@ import { OrangeButton, RedButton } from "../../../styles/button.styles";
 import { AppContext } from "../../../contexts/appContext";
 import { useMediaQuery } from "@material-ui/core";
 import { useRouter } from "next/router";
+import { useStats } from "../../../hooks/useStats";
 interface ChannelProps extends Omit<ChannelModel, "order"> {
 	isOwned?: boolean;
 	passKey?: any;
@@ -69,42 +69,27 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [channelName, setChannelName] = useState(props.name);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [isLive, setIsLive] = useState(false);
 	const { user } = useContext(authContext);
 	const { setSavedChannels } = useContext(AppContext);
 
 	const isSmall = useMediaQuery("(max-width: 750px)");
 
-	const getLive = useCallback(async () => {
-		if (channelName) {
-			const ApiUrl = `${
-				process.env.NEXT_PUBLIC_SOCKET_URL
-			}/stats/twitch/?name=${channelName?.toLowerCase?.()}&new=true`;
-			const response = await fetch(ApiUrl);
-			const data = await response.json();
-			setIsLive(() => !!(data?.isLive && channelName));
-		}
-	}, [channelName, props]);
+	const stats = useStats(props.name);
 
-	useEffect(() => {
-		getLive();
-	}, []);
+	const { isLive } = stats || { isLive: false };
 
 	const removeChannel = useCallback(async () => {
 		const userRef = firebaseClient.db.collection("Streamers").doc(user.uid);
 		setSavedChannels(prev => {
 			const modChannels = prev;
-			const newModChannels = modChannels.filter(channel => channel.id !== props.id);
+			const newModChannels = modChannels.filter(channel => channel.id !== props.id).filter(doc => doc.id);
 			userRef.update({
-				ModChannels: newModChannels,
+				ModChannels: newModChannels.filter(doc => doc.id),
 				removedChannels: firebaseClient.append(props.id),
 			});
 			return newModChannels;
 		});
 	}, [user, props, user]);
-
-
-	useInterval(getLive, 60000 * 4);
 
 	return (
 		<ChannelItemBody style={props.large ? { width: "100%" } : {}} ref={ref} key={props.passKey}>

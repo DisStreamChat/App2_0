@@ -9,7 +9,21 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HomeIcon from "@material-ui/icons/Home";
 import Link from "next/link";
 import { useSocketContext } from "../../contexts/socketContext";
+import { LiveIndicator } from "../shared/ui-components/LiveIndicator";
+import styled from "styled-components"
+import { useStats } from "../../hooks/useStats";
 const { ipcRenderer } = require("electron");
+
+
+const ChannelInfo = styled.div`
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	a {
+		text-decoration: underline;
+		text-underline-offset: .15rem;
+	}
+`
 
 const Header = () => {
 	const [chatUser, setChatUser] = useState<TwitchUserModel>({} as TwitchUserModel);
@@ -30,6 +44,8 @@ const Header = () => {
 		})();
 	}, [chatId]);
 
+	const stats = useStats(chatUser?.login)
+
 	const twitchUrl = `https://twitch.tv/${chatUser.display_name?.toLowerCase()}`;
 	if (initial) return <></>;
 
@@ -46,14 +62,12 @@ const Header = () => {
 						Sign out
 					</PurpleButton>
 				) : (
-					<div>
-						<a
-							href={twitchUrl}
-							target="_blank"
-						>
+					<ChannelInfo>
+						<LiveIndicator live={stats.isLive} />
+						<a href={twitchUrl} target="_blank">
 							{chatUser.display_name}
 						</a>
-					</div>
+					</ChannelInfo>
 				)}
 				<div>
 					<Link href="/channels">

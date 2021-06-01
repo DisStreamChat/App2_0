@@ -15,7 +15,7 @@ const Channels = () => {
 		setSavedChannels(prev => {
 			prev[previousIndex].order = nextIndex;
 			prev[nextIndex].order = previousIndex;
-			const newList = reorder(prev, previousIndex, nextIndex);
+			const newList = reorder(prev, previousIndex, nextIndex).filter(doc => doc.id);
 			firebaseClient.db.collection("Streamers").doc(user.uid).update({ ModChannels: newList });
 			return newList;
 		});

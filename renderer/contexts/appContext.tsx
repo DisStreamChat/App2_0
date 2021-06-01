@@ -2,7 +2,7 @@ import { ipcRenderer } from "electron";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ChannelModel } from "../models/channel.model";
 import { authContext } from "./authContext";
-import firebaseClient from "../firebase/client"
+import firebaseClient from "../firebase/client";
 
 export interface AppContextModel {
 	savedChannels: ChannelModel[];
@@ -37,7 +37,7 @@ export const AppContextProvider = props => {
 				order: channel.order || i - 1,
 				...channel,
 			}));
-			setSavedChannels(channels.sort((a, b) => a.order - b.order));
+			setSavedChannels(channels.sort((a, b) => a.order - b.order).filter(doc => doc.id));
 		})();
 	}, [user]);
 
