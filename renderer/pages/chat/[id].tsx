@@ -16,7 +16,7 @@ import { useSocketContext } from "../../contexts/socketContext";
 import { AnimatePresence } from "framer-motion";
 import CloseIcon from "@material-ui/icons/Close";
 import AddIcon from "@material-ui/icons/Add";
-import { EmptyButton } from "../../components/shared/ui-components/Buttons";
+import FavoriteIcon from "@material-ui/icons/Favorite";
 import { ClickAwayListener } from "@material-ui/core";
 import { authContext } from "../../contexts/authContext";
 import { ClearButton } from "../../styles/button.styles";
@@ -26,7 +26,7 @@ const ChatMain = styled(Main)`
 `;
 
 const ChatContainer = styled.div`
-	height: calc(100vh - 95px - 28px);
+	height: calc(100vh - 95px - 30px);
 	overflow-x: hidden;
 	::-webkit-scrollbar {
 		width: 0.25rem;

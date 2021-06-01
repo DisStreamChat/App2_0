@@ -13,10 +13,9 @@ import { LiveIndicator } from "../shared/ui-components/LiveIndicator";
 import styled from "styled-components";
 import { useStats } from "../../hooks/useStats";
 import FavoriteTwoToneIcon from "@material-ui/icons/FavoriteTwoTone";
+import FavoriteIcon from '@material-ui/icons/Favorite';
 import EmailTwoToneIcon from "@material-ui/icons/EmailTwoTone";
-import PeopleAltTwoToneIcon from "@material-ui/icons/PeopleAltTwoTone";
 import { GroupTwoTone } from "@material-ui/icons";
-import { EmptyButton } from "../shared/ui-components/Buttons";
 const { ipcRenderer } = require("electron");
 
 const ChannelInfo = styled.div`
@@ -36,6 +35,7 @@ const Icons = styled.div`
 	button {
 		display: flex;
 		align-items: center;
+		gap: .2rem;
 	}
 	& > div {
 		display: flex;
@@ -110,6 +110,7 @@ const Header = () => {
 							</ClearButton>
 							<ClearButton>
 								<GroupTwoTone />
+								{stats.viewer_count}
 							</ClearButton>
 						</div>
 					)}
