@@ -19,6 +19,7 @@ import AddIcon from "@material-ui/icons/Add";
 import { EmptyButton } from "../../components/shared/ui-components/Buttons";
 import { ClickAwayListener } from "@material-ui/core";
 import { authContext } from "../../contexts/authContext";
+import { ClearButton } from "../../styles/button.styles";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -200,14 +201,15 @@ const Chat = () => {
 								}}
 							>
 								<div>
-									<EmptyButton
+									<ClearButton
+										style={{ paddingBottom: "0rem", paddingTop: "0rem", marginTop: ".125rem" }}
 										className="add-button"
 										onClick={() => {
 											setAddingChannel(true);
 										}}
 									>
 										<AddIcon />
-									</EmptyButton>
+									</ClearButton>
 									{addingChannel && (
 										<ChannelList>
 											{savedChannels

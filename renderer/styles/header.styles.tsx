@@ -20,7 +20,7 @@ export const IconSection = styled.div`
 	height: 100%;
 	padding: 0 1rem;
 	align-items: center;
-	&.chat-header{
+	&.chat-header {
 		justify-content: space-between;
 	}
 `;

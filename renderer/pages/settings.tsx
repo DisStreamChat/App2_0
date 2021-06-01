@@ -77,6 +77,8 @@ const settingReducer = (state, action: Action) => {
 
 const SettingsMain = styled.div`
 	padding: 0 2rem;
+	height: 97vh;
+	overflow: auto;
 `;
 
 const SearchContainer = styled.div`
@@ -155,6 +157,7 @@ const Home = ({ settings: defaultSettings }) => {
 			<Settings>
 				{allSettings.map(setting => (
 					<SettingComponent
+						key={setting.name}
 						{...setting}
 						open={openItem === setting.name}
 						onClick={name => setOpenItem(prev => (prev === name ? null : name))}

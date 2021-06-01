@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 export const Tab = styled.div`
 	background: #212121;
 	/* color: black; */
+	height: 28px;
 	clip-path: polygon(0 0, 80% 0, 100% 100%, 0% 100%);
 	font-size: 75%;
 	border-bottom: none;
