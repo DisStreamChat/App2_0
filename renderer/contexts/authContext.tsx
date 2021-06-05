@@ -15,7 +15,8 @@ export const AuthContextProvider = ({ children }) => {
 
 	useEffect(() => {
 		return firebaseClient.auth.onAuthStateChanged(async (user: userModel) => {
-			const userId = user.uid;
+			if(!user) return
+			const userId = user?.uid;
 			const userDbRef = firebaseClient.db.collection("Streamers").doc(userId);
 			const userDbObject = await userDbRef.get();
 			const userDbData = userDbObject.data();

@@ -99,11 +99,16 @@ const SearchContainer = styled.div`
 
 const Home = () => {
 	const [search, setSearch] = useState("");
+	const [defaultSettings, setDefaultSettings] = useState([]);
 	const { user } = useAuth();
 
 	const [settings] = useDocumentData(firebaseClient.db.collection("defaults").doc("settings16"));
+
 	console.log(settings)
-	const defaultSettings = settings?.settings
+
+	useEffect(() => {
+		setDefaultSettings(settings?.settings);
+	}, [settings]);
 
 	const allSettings: Setting[] = useMemo(
 		() =>
@@ -124,7 +129,7 @@ const Home = () => {
 						.toLowerCase()
 						.includes(search.toLowerCase());
 				}),
-		[search]
+		[search, defaultSettings]
 	);
 	const [openItem, setOpenItem] = useState(null);
 	const [state, dispatch] = useReducer(settingReducer, {});
