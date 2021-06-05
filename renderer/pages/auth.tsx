@@ -1,13 +1,14 @@
 import styled from "styled-components";
 import { DiscordButton, TwitchButton } from "../styles/button.styles";
 import firebaseClient from "../firebase/client";
-import { useRouter } from "next/router";
+import { useRouter, Router } from "next/router";
 const { ipcRenderer, remote } = require("electron");
 import { v4 } from "uuid";
 import nookies from "nookies";
 import { verifyIdToken } from "../firebase/admin";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
+import { useAuth } from "../contexts/authContext";
 
 const AuthContainer = styled.div`
 	width: 100vw;
@@ -71,6 +72,7 @@ const AuthPage = () => {
 	const router = useRouter();
 
 	const [termsChecked, setTermsChecked] = useState(false)
+	const {user} = useAuth()
 
 	const loginWithTwitch = async () => {
 		try {
@@ -105,6 +107,11 @@ const AuthPage = () => {
 			ipcRenderer.send("login");
 		}
 	};
+
+	if(user){
+		router.push("/channels")
+		return null
+	}
 
 	const submitHandler = (e) => {
 		e.preventDefault();
@@ -156,18 +163,6 @@ const AuthPage = () => {
 			</AuthBody>
 		</AuthContainer>
 	);
-};
-
-export const getServerSideProps: GetServerSideProps = async context => {
-	const { req, res, params } = context;
-
-	const cookies = nookies.get(context);
-	const token = cookies["auth-token"]
-	const verified = await verifyIdToken(token ?? "")
-	if (verified) {
-		res.writeHead(307, { location: "/channels" }).end()
-	}
-	return { props: {} };
 };
 
 export default AuthPage;

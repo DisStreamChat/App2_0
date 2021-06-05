@@ -97,9 +97,13 @@ const SearchContainer = styled.div`
 	}
 `;
 
-const Home = ({ settings: defaultSettings }) => {
+const Home = () => {
 	const [search, setSearch] = useState("");
 	const { user } = useAuth();
+
+	const [settings] = useDocumentData(firebaseClient.db.collection("defaults").doc("settings16"));
+	console.log(settings)
+	const defaultSettings = settings?.settings
 
 	const allSettings: Setting[] = useMemo(
 		() =>
@@ -187,18 +191,3 @@ const Home = ({ settings: defaultSettings }) => {
 };
 
 export default Home;
-
-export async function getServerSideProps() {
-	let settings = {};
-	let categories = [];
-	const settingsRef = await admin.firestore().collection("defaults").doc("settings16").get();
-	settings = settingsRef.data()?.settings;
-	categories = [
-		//@ts-ignore
-		...new Set(Object.values(settings || {}).map(val => val.category)),
-	]
-		.filter(Boolean)
-		.sort();
-
-	return { props: { settings } };
-}

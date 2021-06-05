@@ -14,21 +14,13 @@ const Main = styled.main`
 const Initial = () => {
 	useEffect(() => {
 		firebaseClient.auth.onAuthStateChanged(async user => {
-			try {
-				const token = await user.getIdToken();
-				nookies.set(undefined, "auth-token", token, { sameSite: "lax", path: "/" });
-			} finally {
-				ipcRenderer.send("app-ready");
-			}
+			ipcRenderer.send("app-ready");
 		});
 	}, []);
 
 	return (
 		<Main>
-			<img
-				src="/images/discord.gif"
-				alt=""
-			/>
+			<img src="/images/discord.gif" alt="" />
 		</Main>
 	);
 };
