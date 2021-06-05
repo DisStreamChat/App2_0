@@ -6,7 +6,11 @@ export const ChannelMain = styled(Main)`
 	padding: 0 4rem;
 	padding-top: 1rem;
 	width: 100%;
-	height: calc(100vh - (80px + 1rem));
+	height: calc(100vh - (80px + 1rem - 65px));
+	&.active {
+		transition: height 0.25s;
+		height: calc(100vh - (80px + 1rem));
+	}
 	display: flex;
 	flex-direction: column;
 	align-items: center;

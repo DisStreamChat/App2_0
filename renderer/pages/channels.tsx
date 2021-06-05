@@ -8,7 +8,7 @@ import { ChannelModel } from "../models/channel.model";
 import Reorder, { reorder, reorderImmutable, reorderFromTo, reorderFromToImmutable } from "react-reorder";
 
 const Channels = () => {
-	const { savedChannels, setSavedChannels, setTabChannels } = useContext(AppContext);
+	const { savedChannels, setSavedChannels, setTabChannels, appActive } = useContext(AppContext);
 	const { user } = useContext(authContext);
 
 	const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
@@ -22,7 +22,7 @@ const Channels = () => {
 	};
 
 	return (
-		<ChannelMain>
+		<ChannelMain className={`${appActive ? "active" : ""}`} animate={{ y: appActive ? 0 : -65 }}>
 			<h1>Your Channel</h1>
 			<ChannelItem
 				id="514845764"

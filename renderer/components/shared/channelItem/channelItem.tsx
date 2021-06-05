@@ -33,7 +33,6 @@ export const ChannelSearchItem = React.memo(() => {
 
 	const submit = async e => {
 		e.preventDefault();
-		console.log(search);
 		const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`);
 		const json = await response.json();
 		if (json.exists) {

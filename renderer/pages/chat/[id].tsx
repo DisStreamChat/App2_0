@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Main } from "../../styles/global.styles";
 import useSocket from "../../hooks/useSocket";
 import useSocketEvent from "../../hooks/useSocketEvent";
@@ -20,13 +20,22 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import { ClickAwayListener } from "@material-ui/core";
 import { authContext } from "../../contexts/authContext";
 import { ClearButton } from "../../styles/button.styles";
+import { useInteraction } from "../../hooks/useInteraction";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
 `;
 
 const ChatContainer = styled.div`
-	height: calc(100vh - 95px - 30px);
+	--tabHeight: 0px;
+	height: calc(100vh - 30px - var(--tabHeight));
+	&.active {
+		transition: height 0.25s;
+		height: calc(100vh - 30px - var(--tabHeight) - 65px);
+	}
+	&.tabs { 
+		--tabHeight: 56px;
+	}
 	overflow-x: hidden;
 	::-webkit-scrollbar {
 		width: 0.25rem;
@@ -37,10 +46,22 @@ const ChatContainer = styled.div`
 
 const ChannelList = styled.ul`
 	z-index: 100;
+	overflow: auto;
+	max-height: 200px;
+	border-radius: 0.25rem;
 	position: absolute;
-	background: black;
-	padding: 0.5rem !important;
+	background: #121212;
 	li {
+		&:first-child {
+			padding-top: 0.5rem !important;
+		}
+		&:last-child {
+			padding-bottom: 0.5rem !important;
+		}
+		&:hover {
+			background: #ffffff11;
+		}
+		padding: 0 0.5rem !important;
 		cursor: pointer;
 	}
 `;
@@ -87,8 +108,8 @@ const Chat = () => {
 	const { socket } = useSocketContext();
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
-	const { tabChannels, savedChannels, setTabChannels, tabsOpen, setTabsOpen } = useContext(AppContext);
 	const [addingChannel, setAddingChannel] = useState(false);
+	const { tabChannels, savedChannels, setTabChannels, settings, appActive } = useContext(AppContext);
 	const { user } = useContext(authContext);
 
 	useSocketEvent(socket, "connect", () => {
@@ -119,7 +140,6 @@ const Chat = () => {
 						`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${id}`
 					);
 					const json = await response.json();
-					console.log(json);
 					const { data } = json;
 					setChannel({ twitchName: data.login });
 				}
@@ -178,73 +198,71 @@ const Chat = () => {
 	}, [channel]);
 
 	return (
-		<>
-			<ChatMain>
-				<AnimatePresence>
-					{
-						<TabContainer exit={{ height: 0 }}>
-							{tabChannels.map(channel => (
-								<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`}>
-									<Link href={`/chat/${channel.id}`}>
-										<a>{channel.name}</a>
-									</Link>
-									<CloseIcon
-										onClick={() => {
-											setTabChannels(prev => prev.filter(c => c.id !== channel.id));
-										}}
-									/>
-								</Tab>
-							))}
-							<ClickAwayListener
-								onClickAway={() => {
-									setAddingChannel(false);
-								}}
-							>
-								<div>
-									<ClearButton
-										style={{ paddingBottom: "0rem", paddingTop: "0rem", marginTop: ".125rem" }}
-										className="add-button"
-										onClick={() => {
-											setAddingChannel(true);
-										}}
-									>
-										<AddIcon />
-									</ClearButton>
-									{addingChannel && (
-										<ChannelList>
-											{savedChannels
-												.filter(channel => !tabChannels.find(tab => channel.id === tab.id))
-												.map(channel => (
-													<li
-														onClick={() => {
-															setTabChannels(prev => {
-																const newList = [...prev, channel];
-																ipcRenderer.send("writeTabs", user.uid, newList);
-																return newList;
-															});
-															setAddingChannel(false);
-														}}
-														key={channel.id}
-													>
-														{channel.name}
-													</li>
-												))}
-										</ChannelList>
-									)}
-								</div>
-							</ClickAwayListener>
-						</TabContainer>
-					}
-				</AnimatePresence>
-				<ChatContainer>
-					<MessageList>
-						{messages.map(msg => (
-							<Message {...msg} key={msg.id}></Message>
+		<ChatMain animate={{ y: appActive ? 0 : -65 }}>
+			<AnimatePresence>
+				{settings.ShowTabs && (
+					<TabContainer initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}>
+						{tabChannels.map(channel => (
+							<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`}>
+								<Link href={`/chat/${channel.id}`}>
+									<a>{channel.name}</a>
+								</Link>
+								<CloseIcon
+									onClick={() => {
+										setTabChannels(prev => prev.filter(c => c.id !== channel.id));
+									}}
+								/>
+							</Tab>
 						))}
-					</MessageList>
-				</ChatContainer>
-			</ChatMain>
-		</>
+						<ClickAwayListener
+							onClickAway={() => {
+								setAddingChannel(false);
+							}}
+						>
+							<div>
+								<ClearButton
+									style={{ paddingBottom: "0rem", paddingTop: "0rem", marginTop: ".125rem" }}
+									className="add-button"
+									onClick={() => {
+										setAddingChannel(true);
+									}}
+								>
+									<AddIcon />
+								</ClearButton>
+								{addingChannel && (
+									<ChannelList>
+										{savedChannels
+											.filter(channel => !tabChannels.find(tab => channel.id === tab.id))
+											.map(channel => (
+												<li
+													onClick={() => {
+														setTabChannels(prev => {
+															const newList = [...prev, channel];
+															ipcRenderer.send("writeTabs", user.uid, newList);
+															return newList;
+														});
+														setAddingChannel(false);
+													}}
+													key={channel.id}
+												>
+													{channel.name}
+												</li>
+											))}
+									</ChannelList>
+								)}
+							</div>
+						</ClickAwayListener>
+					</TabContainer>
+				)}
+			</AnimatePresence>
+			<ChatContainer className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""}`}>
+				<MessageList>
+					{messages.map(msg => (
+						<Message {...msg} key={msg.id}></Message>
+					))}
+				</MessageList>
+			</ChatContainer>
+		</ChatMain>
 	);
 };
 

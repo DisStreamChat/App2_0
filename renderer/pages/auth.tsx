@@ -93,7 +93,6 @@ const AuthPage = () => {
 			);
 		} catch (err) {
 			const receiveMessage = async (event, data) => {
-				// console.log(data);
 				const json = data;
 				await firebaseClient.auth.signInWithCustomToken(json.token);
 			};

@@ -21,7 +21,6 @@ export const useStats = (channelName: string): StatsModel => {
 			interval = setInterval(getStats, 6000*2);
 		}
 		return () => {
-			console.log(`clearing ${interval}`);
 			clearInterval(interval);
 		};
 	}, [channelName]);

@@ -4,6 +4,7 @@ import { baseUrl, createWindow, isProd } from "./helpers";
 import hotKeyManager from "./helpers/hotkeys";
 import { appPath, getMessages, getTabs, writeMessages, writeTabs } from "./helpers/file-saving";
 import { TabModel } from "../models/tab.model";
+import { sendMessageToWindow } from "./helpers/sendMessage";
 
 const focus = () => hotKeyManager.focusCallback();
 const unfocus = () => hotKeyManager.unfocusCallback();
@@ -34,6 +35,8 @@ const startMainWindow = () => {
 	});
 
 	mainWindow.loadURL(baseUrl("auth"));
+	mainWindow.on("focus", () => sendMessageToWindow("focus", true, mainWindow))
+	mainWindow.on("blur", () => sendMessageToWindow("focus", false, mainWindow))
 };
 let loadingWindow;
 (async () => {

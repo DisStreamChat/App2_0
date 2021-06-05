@@ -33,6 +33,7 @@ export const Tab = styled.div`
 
 export const TabContainer = styled(motion.div)`
 	display: flex;
+	transform-origin: top center;
 	/* gap: 0.25rem; */
 	background: var(--background-transparent-gray);
 	overflow: hidden;

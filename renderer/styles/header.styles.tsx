@@ -1,14 +1,17 @@
 import styled from "styled-components";
+import { motion } from "framer-motion";
 
-export const HeaderBody = styled.header`
+export const HeaderBody = styled(motion.header)`
+	transform-origin: top center;
 	position: fixed;
 	top: 30px;
+	overflow: hidden;
 	height: 65px;
 	width: 100%;
 	background: var(--background-transparent-gray);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 `;
 
 export const IconSection = styled.div`
