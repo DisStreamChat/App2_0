@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { SaveBar } from '../components/shared/ui-components/SaveBar';
 import { useAuth } from '../contexts/authContext';
 import firebaseClient from '../firebase/client';
+import {motion} from "framer-motion"
 
 interface Setting {
 	category: string;
@@ -79,7 +80,7 @@ const SettingsMain = styled.div`
 	overflow: auto;
 `;
 
-export const SearchContainer = styled.div`
+export const SearchContainer = styled(motion.div)`
 	position: sticky;
 	top: 0;
 	z-index: 100;

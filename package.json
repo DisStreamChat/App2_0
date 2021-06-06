@@ -41,6 +41,7 @@
 		"sha1": "^1.1.1",
 		"socket.io-client": "^4.0.1",
 		"styled-components": "^5.2.1",
+		"use-hotkeys": "^1.1.0",
 		"use-socket.io-client": "^1.1.0",
 		"uuid": "^8.3.2"
 	},

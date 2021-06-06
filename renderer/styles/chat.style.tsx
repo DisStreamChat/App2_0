@@ -38,5 +38,5 @@ export const TabContainer = styled(motion.div)`
 	background: var(--background-transparent-gray);
 	overflow: hidden;
 	flex-wrap: wrap;
-
+	z-index: 1000000;
 `;

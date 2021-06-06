@@ -15,13 +15,14 @@ import { AppContext } from "../../contexts/appContext";
 import { authContext } from "../../contexts/authContext";
 import { useSocketContext } from "../../contexts/socketContext";
 import firebaseClient from "../../firebase/client";
+import handleFlags from "../../functions/flagFunctions";
 import useSocketEvent from "../../hooks/useSocketEvent";
 import { MessageModel } from "../../models/message.model";
 import { ClearButton } from "../../styles/button.styles";
 import { Tab, TabContainer } from "../../styles/chat.style";
 import { Main } from "../../styles/global.styles";
 import { SearchContainer } from "../settings";
-import handleFlags from "../../functions/flagFunctions";
+import useHotkeys from "use-hotkeys";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -112,10 +113,11 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const [addingChannel, setAddingChannel] = useState(false);
-	const { tabChannels, savedChannels, setTabChannels, settings, appActive } = useContext(AppContext);
+	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active } = useContext(AppContext);
 	const { user } = useContext(authContext);
 	const [messageQuery, setMessageQuery] = useState("");
 	const [isMod, setIsMod] = useState(false);
+	const [showSearch, setShowSearch] = useState(true);
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
@@ -204,12 +206,32 @@ const Chat = () => {
 
 	const flagMatches = useMemo(
 		() =>
-			handleFlags(appActive ? messageQuery : "", [...messages])
+			handleFlags(showSearch ? messageQuery : "", [...messages])
 				.filter(msg => !msg.deleted)
 				.filter(msg => (msg.autoMod ? settings.ShowAutomodMessages && isMod : true))
 				.sort((a, b) => a.sentAt - b.sentAt)
 				.map(message => ({ ...message, moddable: message.moddable && isMod })),
-		[messages, messageQuery, setMessageQuery, isMod, settings]
+		[messages, messageQuery, setMessageQuery, isMod, settings, active]
+	);
+
+	useHotkeys(
+		(key, event, handle) => {
+			switch (key) {
+				case "ctrl+f":
+					setMessageQuery("");
+					setShowSearch(true);
+					(document.querySelector(".settings--searchbox") as HTMLInputElement).focus();
+					break;
+				case "esc":
+					setShowSearch(false);
+					setMessageQuery("");
+					break;
+				default:
+					break;
+			}
+		},
+		["ctrl+f", "esc"],
+		[]
 	);
 
 	return (
@@ -271,13 +293,21 @@ const Chat = () => {
 				)}
 			</AnimatePresence>
 			<ChatContainer className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""}`}>
-				<SearchContainer>
-					<SearchBox
-						search={messageQuery}
-						onChange={val => setMessageQuery(val)}
-						resetSearch={() => setMessageQuery("")}
-					></SearchBox>
-				</SearchContainer>
+				<AnimatePresence>
+					{showSearch && active && (
+						<SearchContainer
+							initial={{ opacity: 0, y: -100, height: 0 }}
+							animate={{ opacity: 1, y: 0, height: "auto" }}
+							exit={{ opacity: 0, y: -100, height: 0 }}
+						>
+							<SearchBox
+								search={messageQuery}
+								onChange={val => setMessageQuery(val)}
+								resetSearch={() => setMessageQuery("")}
+							></SearchBox>
+						</SearchContainer>
+					)}
+				</AnimatePresence>
 				<MessageList>
 					{flagMatches.map(msg => (
 						<Message {...msg} key={msg.id}></Message>

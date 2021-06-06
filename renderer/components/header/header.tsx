@@ -93,13 +93,15 @@ const Header = () => {
 
 	const stats = useStats(chatUser?.login);
 
+
+
 	const twitchUrl = `https://twitch.tv/${chatUser.display_name?.toLowerCase()}`;
 	if (initial) return <></>;
 
 	return (
 		<AnimatePresence>
 			{showHeader && (
-				<HeaderBody initial={{ scaleY:0 }} animate={{ scaleY: 1 }} exit={{ scaleY: 0 }}>
+				<HeaderBody initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} exit={{ scaleY: 0 }}>
 					<IconSection className={`${chatHeader ? "chat-header" : ""}`}>
 						{!chatHeader ? (
 							<PurpleButton
@@ -121,25 +123,27 @@ const Header = () => {
 						<Icons>
 							{chatHeader && (
 								<div className={`${chatHeader ? "chat-icons" : ""}`}>
-									<ClearButton
-										onClick={async () => {
-											const wasFollowing = !!isFollowing;
-											setIsFollowing(prev => !prev);
-											const otc = (
-												await firebaseClient.db.collection("Secret").doc(uid).get()
-											).data().value;
+									{id !== chatId && (
+										<ClearButton
+											onClick={async () => {
+												const wasFollowing = !!isFollowing;
+												setIsFollowing(prev => !prev);
+												const otc = (
+													await firebaseClient.db.collection("Secret").doc(uid).get()
+												).data().value;
 
-											const response = await apiFetch(
-												`v2/twitch/follow?user=${id}&channel=${chatId}&id=${uid}&otc=${otc}`,
-												{
-													method: wasFollowing ? "DELETE" : "PUT",
-												}
-											);
-											if (response !== "success") setIsFollowing(wasFollowing);
-										}}
-									>
-										{isFollowing ? <FavoriteIcon /> : <FavoriteTwoToneIcon />}
-									</ClearButton>
+												const response = await apiFetch(
+													`v2/twitch/follow?user=${id}&channel=${chatId}&id=${uid}&otc=${otc}`,
+													{
+														method: wasFollowing ? "DELETE" : "PUT",
+													}
+												);
+												if (response !== "success") setIsFollowing(wasFollowing);
+											}}
+										>
+											{isFollowing ? <FavoriteIcon /> : <FavoriteTwoToneIcon />}
+										</ClearButton>
+									)}
 									<ClearButton>
 										<EmailTwoToneIcon />
 									</ClearButton>

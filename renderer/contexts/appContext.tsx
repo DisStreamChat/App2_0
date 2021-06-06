@@ -27,6 +27,7 @@ export interface AppContextModel {
 	appActive: boolean;
 	windowFocused: boolean;
 	setWindowFocused: React.Dispatch<React.SetStateAction<boolean>>;
+	active: boolean
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -95,6 +96,7 @@ export const AppContextProvider = props => {
 			value={{
 				windowFocused,
 				setWindowFocused,
+				active: appHovered || windowFocused,
 				appActive: appHovered ? true : settings?.HideHeaderOnUnfocus ? windowFocused : true,
 				appHovered,
 				twitchDetails,
