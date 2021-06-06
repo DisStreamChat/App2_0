@@ -1,14 +1,12 @@
-import React, { useEffect, useMemo, useReducer, useState } from "react";
-import Head from "next/head";
-import Link from "next/link";
-import { SearchBox, BooleanSetting, ColorSetting, ListSetting, RangeSetting, SelectSetting } from "disstreamchat-utils";
-import styled from "styled-components";
-import admin from "../firebase/admin";
-import { isEqual } from "lodash";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import firebaseClient from "../firebase/client";
-import { useAuth } from "../contexts/authContext";
-import { SaveBar } from "../components/shared/ui-components/SaveBar";
+import { BooleanSetting, ColorSetting, ListSetting, RangeSetting, SearchBox, SelectSetting } from 'disstreamchat-utils';
+import { isEqual } from 'lodash';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+import styled from 'styled-components';
+
+import { SaveBar } from '../components/shared/ui-components/SaveBar';
+import { useAuth } from '../contexts/authContext';
+import firebaseClient from '../firebase/client';
 
 interface Setting {
 	category: string;
@@ -81,7 +79,7 @@ const SettingsMain = styled.div`
 	overflow: auto;
 `;
 
-const SearchContainer = styled.div`
+export const SearchContainer = styled.div`
 	position: sticky;
 	top: 0;
 	z-index: 100;

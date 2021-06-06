@@ -1,26 +1,27 @@
-import { useRouter } from "next/router";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Main } from "../../styles/global.styles";
-import useSocket from "../../hooks/useSocket";
-import useSocketEvent from "../../hooks/useSocketEvent";
-import { Message, MessageList } from "disstreamchat-utils";
-import { MessageModel } from "../../models/message.model";
-import sha1 from "sha1";
-import firebaseClient from "../../firebase/client";
-import { AppContext } from "../../contexts/appContext";
-import Link from "next/link";
-import styled from "styled-components";
-import { TabContainer, Tab } from "../../styles/chat.style";
+import { Message, MessageList, SearchBox } from "disstreamchat-utils";
 import { ipcRenderer } from "electron";
-import { useSocketContext } from "../../contexts/socketContext";
 import { AnimatePresence } from "framer-motion";
-import CloseIcon from "@material-ui/icons/Close";
-import AddIcon from "@material-ui/icons/Add";
-import FavoriteIcon from "@material-ui/icons/Favorite";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import sha1 from "sha1";
+import styled from "styled-components";
+
 import { ClickAwayListener } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+
+import { AppContext } from "../../contexts/appContext";
 import { authContext } from "../../contexts/authContext";
+import { useSocketContext } from "../../contexts/socketContext";
+import firebaseClient from "../../firebase/client";
+import useSocketEvent from "../../hooks/useSocketEvent";
+import { MessageModel } from "../../models/message.model";
 import { ClearButton } from "../../styles/button.styles";
-import { useInteraction } from "../../hooks/useInteraction";
+import { Tab, TabContainer } from "../../styles/chat.style";
+import { Main } from "../../styles/global.styles";
+import { SearchContainer } from "../settings";
+import handleFlags from "../../functions/flagFunctions";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -33,7 +34,7 @@ const ChatContainer = styled.div`
 		transition: height 0.25s;
 		height: calc(100vh - 30px - var(--tabHeight) - 65px);
 	}
-	&.tabs { 
+	&.tabs {
 		--tabHeight: 56px;
 	}
 	overflow-x: hidden;
@@ -102,6 +103,8 @@ class QueueBuffer {
 
 const buffer = new QueueBuffer();
 
+// const SearchConta
+
 const Chat = () => {
 	const router = useRouter();
 	const id = router.query.id as string;
@@ -111,6 +114,8 @@ const Chat = () => {
 	const [addingChannel, setAddingChannel] = useState(false);
 	const { tabChannels, savedChannels, setTabChannels, settings, appActive } = useContext(AppContext);
 	const { user } = useContext(authContext);
+	const [messageQuery, setMessageQuery] = useState("");
+	const [isMod, setIsMod] = useState(false);
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
@@ -197,6 +202,16 @@ const Chat = () => {
 		};
 	}, [channel]);
 
+	const flagMatches = useMemo(
+		() =>
+			handleFlags(appActive ? messageQuery : "", [...messages])
+				.filter(msg => !msg.deleted)
+				.filter(msg => (msg.autoMod ? settings.ShowAutomodMessages && isMod : true))
+				.sort((a, b) => a.sentAt - b.sentAt)
+				.map(message => ({ ...message, moddable: message.moddable && isMod })),
+		[messages, messageQuery, setMessageQuery, isMod, settings]
+	);
+
 	return (
 		<ChatMain animate={{ y: appActive ? 0 : -65 }}>
 			<AnimatePresence>
@@ -256,8 +271,15 @@ const Chat = () => {
 				)}
 			</AnimatePresence>
 			<ChatContainer className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""}`}>
+				<SearchContainer>
+					<SearchBox
+						search={messageQuery}
+						onChange={val => setMessageQuery(val)}
+						resetSearch={() => setMessageQuery("")}
+					></SearchBox>
+				</SearchContainer>
 				<MessageList>
-					{messages.map(msg => (
+					{flagMatches.map(msg => (
 						<Message {...msg} key={msg.id}></Message>
 					))}
 				</MessageList>
