@@ -1,6 +1,6 @@
 import { Message, MessageList, SearchBox } from "disstreamchat-utils";
 import { ipcRenderer } from "electron";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -10,7 +10,7 @@ import styled from "styled-components";
 import { ClickAwayListener } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
-
+import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
 import { AppContext } from "../../contexts/appContext";
 import { authContext } from "../../contexts/authContext";
 import { useSocketContext } from "../../contexts/socketContext";
@@ -104,7 +104,72 @@ class QueueBuffer {
 
 const buffer = new QueueBuffer();
 
-// const SearchConta
+const ChatInputContainer = styled.div`
+	& > img {
+		margin: 0 1rem;
+		width: 30px;
+		transition: 0.025s;
+		filter: grayscale(1);
+		cursor: default;
+		&:hover {
+			filter: none;
+		}
+	}
+	&:focus-within {
+		box-shadow: 0 0 0 1px #137cbd, 0 0 0 1px #137cbd, 0 0 0 3px rgba(19, 124, 189, 0.3),
+			inset 0 0 0 1px rgba(16, 22, 26, 0.3), inset 0 1px 1px rgba(16, 22, 26, 0.4);
+	}
+	cursor: text;
+	z-index: 9;
+	position: absolute;
+	bottom: 15px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 95%;
+	height: 75px;
+	background: #212121;
+	border-radius: 0.5rem;
+	color: white;
+	// overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	#chat-input {
+		// width: 86%;
+		flex: 1;
+		resize: none;
+		outline: none;
+		border: none;
+		color: white;
+		padding: 0.75rem;
+		height: 75px;
+		align-self: center;
+		border-radius: 0.5rem;
+		background: #212121;
+		box-sizing: border-box !important;
+		z-index: 10000;
+
+		// min-height: fit-content;
+		&::-webkit-scrollbar {
+			width: 0px;
+		}
+
+		/* Track */
+		&::-webkit-scrollbar-track {
+			background: #f1f1f1;
+		}
+
+		/* Handle */
+		&::-webkit-scrollbar-thumb {
+			background: #888;
+		}
+
+		/* Handle on hover */
+		&::-webkit-scrollbar-thumb:hover {
+			background: #555;
+		}
+	}
+`;
 
 const Chat = () => {
 	const router = useRouter();
@@ -118,6 +183,8 @@ const Chat = () => {
 	const [messageQuery, setMessageQuery] = useState("");
 	const [isMod, setIsMod] = useState(false);
 	const [showSearch, setShowSearch] = useState(true);
+	const [chatValue, setChatValue] = useState("");
+	const [showChatBox, setShowChatBox] = useState(false);
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
@@ -216,6 +283,7 @@ const Chat = () => {
 
 	useHotkeys(
 		(key, event, handle) => {
+			console.log(key);
 			switch (key) {
 				case "ctrl+f":
 					setMessageQuery("");
@@ -223,16 +291,30 @@ const Chat = () => {
 					(document.querySelector(".settings--searchbox") as HTMLInputElement).focus();
 					break;
 				case "esc":
+					setChatValue("");
+					setShowChatBox(false);
 					setShowSearch(false);
 					setMessageQuery("");
+					break;
+				case "ctrl+shift+c":
+					setChatValue("");
+					setShowChatBox(true);
 					break;
 				default:
 					break;
 			}
 		},
-		["ctrl+f", "esc"],
+		["ctrl+f", "esc", "ctrl+shift+c"],
 		[]
 	);
+
+	const sendMessage = () => {
+		if (socket) {
+			socket.emit("sendchat", {
+				message: chatValue,
+			});
+		}
+	};
 
 	return (
 		<ChatMain animate={{ y: appActive ? 0 : -65 }}>
@@ -313,6 +395,97 @@ const Chat = () => {
 						<Message {...msg} key={msg.id}></Message>
 					))}
 				</MessageList>
+				<AnimatePresence>
+					{showChatBox && active && (
+						<motion.div
+							initial={{ opacity: 0, y: -100 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -100 }}
+							id="chat-input--container"
+							onClick={() => {
+								document.getElementById("chat-input").focus();
+							}}
+						>
+							<ChatInputContainer>
+								<ReactTextareaAutocomplete
+									onItemHighlighted={({ item }) => {
+										setTimeout(() => {
+											const name = item?.name;
+											const node = document.getElementById(name);
+											if (node) {
+												//@ts-ignore
+												const _ = node.parentNode?.parentNode?.parentNode?.scrollTo?.({
+													top: node?.offsetTop,
+													left: 0,
+													behavior: "smooth",
+												});
+											}
+										}, 100);
+									}}
+									movePopupAsYouType
+									loadingComponent={() => <span>Loading</span>}
+									minChar={2}
+									listClassName="auto-complete-dropdown"
+									trigger={{}}
+									// trigger={{
+									// 	"@": {
+									// 		dataProvider: token => {
+									// 			return allChatters
+									// 				.filter(chatter => chatter.startsWith(token))
+									// 				.map(chatter => ({ name: `${chatter}`, char: `@${chatter}` }));
+									// 		},
+									// 		component: UserItem,
+									// 		output: (item, trigger) => item.char,
+									// 	},
+									// 	":": {
+									// 		dataProvider: token => {
+									// 			return userEmotes
+									// 				.filter(emote =>
+									// 					emote?.code?.toLowerCase?.()?.includes?.(token?.toLowerCase?.())
+									// 				)
+									// 				.map(emote => ({
+									// 					name: `${emote.id || emote.name}`,
+									// 					char: `${emote.code}`,
+									// 					bttv: emote.bttv,
+									// 					ffz: emote.ffz,
+									// 				}));
+									// 		},
+									// 		component: EmoteItem,
+									// 		output: (item, trigger) => item.char,
+									// 	},
+									// }}
+									onKeyPress={e => {
+										if (e.which === 13 && !e.shiftKey) {
+											sendMessage();
+											setChatValue("");
+											e.preventDefault();
+										}
+									}}
+									name="chat-input"
+									id="chat-input"
+									rows="4"
+									value={chatValue}
+									onChange={e => {
+										setChatValue(e.target.value);
+									}}
+								></ReactTextareaAutocomplete>
+							</ChatInputContainer>
+							{/* will be used in the future */}
+							{/* <Tooltip title="Emote Picker" arrow>
+						<img
+							src={displayMotes[emoteIndex]}
+							onClick={() => {
+								setEmotePickerVisible(prev => !prev);
+							}}
+							onMouseEnter={() => {
+								setEmoteIndex(Math.floor(Math.random() * displayMotes.length));
+							}}
+							alt=""
+						/>
+					</Tooltip> */}
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</ChatContainer>
 		</ChatMain>
 	);

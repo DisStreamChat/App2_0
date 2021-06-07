@@ -14,8 +14,9 @@ export const AuthContextProvider = ({ children }) => {
 	const [user, setUser] = useState<userModel>(null);
 
 	useEffect(() => {
-		return firebaseClient.auth.onAuthStateChanged(async (user: userModel) => {
-			if(!user) return
+		return firebaseClient.auth.onIdTokenChanged(async (user: userModel) => {
+			if (!user) return;
+			nookies.set(undefined, "auth-token", await user.getIdToken(), { path: "/" });
 			const userId = user?.uid;
 			const userDbRef = firebaseClient.db.collection("Streamers").doc(userId);
 			const userDbObject = await userDbRef.get();
