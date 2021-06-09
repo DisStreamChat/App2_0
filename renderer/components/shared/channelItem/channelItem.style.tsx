@@ -5,14 +5,20 @@ export const ChannelItemBody = styled.div`
 	align-items: center;
 	width: 95%;
 	min-height: 100px;
+	&.compact {
+		min-height: 25px;
+		height: 50px;
+		margin: 0.25rem 0;
+		border-radius: 0.25rem;
+		padding-left: 1rem !important;
+	}
 	margin: 0.5rem 0;
 	border-radius: 0.5rem;
 	background: #2a2c30;
 	box-shadow: 3px 3px 5px -2px #0b0c0e;
 	transition: 0.25s;
 	animation: fade-in 0.5s ease-in-out forwards;
-	padding: 1rem 0;
-	
+	padding: 1rem;
 	@media screen and (max-width: 800px) {
 		&,
 		& * {
@@ -21,11 +27,12 @@ export const ChannelItemBody = styled.div`
 		padding: 0.5rem 0;
 	}
 	@media screen and (max-width: 500px) {
+		padding: 0.25rem 0;
 		&,
 		& * {
 			font-size: 0.6rem !important;
 		}
-		button * {
+		&:not(.compact) button * {
 			font-size: 0.7rem !important;
 		}
 	}
@@ -104,7 +111,11 @@ export const ChannelInfo = styled.div`
 	height: 100px;
 	width: 100%;
 	padding-right: 1.5rem;
+	padding-left: 1rem;
 	justify-content: space-between;
+	@media screen and (max-width: 500px) {
+		padding-right: 0.5rem;
+	}
 	.channel-name {
 		text-transform: capitalize;
 		padding-right: 0.5rem;
@@ -121,8 +132,9 @@ export const ChannelButtons = styled.div`
 	button * {
 		white-space: nowrap;
 	}
-	@media screen and (max-width: 400px) {
+	@media screen and (max-width: 600px) {
 		margin: 0;
+		gap: 0.5rem;
 		button {
 			padding: 0.5rem;
 		}

@@ -33,15 +33,15 @@ const Channels = () => {
 			<hr></hr>
 			<h1>Saved Channels</h1>
 			<Reorder
-				reorderId="my-list" // Unique ID that is used internally to track this list (required)
-				reorderGroup="reorder-group" // A group ID that allows items to be dragged between lists of the same group (optional)
-				component={ModChannels} // Tag name or Component to be used for the wrapping element (optional), defaults to 'div'
-				placeholderClassName="placeholder" // Class name to be applied to placeholder elements (optional), defaults to 'placeholder'
-				draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
-				lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
-				onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
-				autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
-				disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
+				reorderId="my-list"
+				reorderGroup="reorder-group"
+				component={ModChannels}
+				placeholderClassName="placeholder"
+				draggedClassName="dragged"
+				lock="horizontal"
+				onReorder={onReorder}
+				autoScroll={true}
+				disableContextMenus={true}
 				holdTime={200}
 			>
 				{savedChannels.map(channel => (

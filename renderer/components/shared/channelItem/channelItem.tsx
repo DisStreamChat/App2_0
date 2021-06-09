@@ -1,9 +1,16 @@
-import firebaseClient from "../../../firebase/client";
-import React, { useState, useContext, useCallback, forwardRef } from "react";
 import { SearchBox } from "disstreamchat-utils";
 import Link from "next/link";
-import { ChannelModel } from "../../../models/channel.model";
+import { useRouter } from "next/router";
+import React, { forwardRef, useCallback, useContext, useState } from "react";
+
+import { useMediaQuery } from "@material-ui/core";
+
+import { AppContext } from "../../../contexts/appContext";
 import { authContext } from "../../../contexts/authContext";
+import firebaseClient from "../../../firebase/client";
+import { useStats } from "../../../hooks/useStats";
+import { ChannelModel } from "../../../models/channel.model";
+import { OrangeButton, RedButton } from "../../../styles/button.styles";
 import {
 	ChannelButtons,
 	ChannelInfo,
@@ -12,11 +19,8 @@ import {
 	ChannelSearchBody,
 	ChannelSearchSection,
 } from "./channelItem.style";
-import { OrangeButton, RedButton } from "../../../styles/button.styles";
-import { AppContext } from "../../../contexts/appContext";
-import { useMediaQuery } from "@material-ui/core";
-import { useRouter } from "next/router";
-import { useStats } from "../../../hooks/useStats";
+import { LiveIndicator } from "../ui-components/LiveIndicator";
+
 interface ChannelProps extends Omit<ChannelModel, "order"> {
 	isOwned?: boolean;
 	passKey?: any;
@@ -69,11 +73,15 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const { user } = useContext(authContext);
-	const { setSavedChannels } = useContext(AppContext);
+	const { setSavedChannels, settings } = useContext(AppContext);
 
 	const isSmall = useMediaQuery("(max-width: 750px)");
 
 	const stats = useStats(props.name);
+
+	const compactChannels = settings?.CompactChannels;
+
+	console.log(compactChannels);
 
 	const { isLive } = stats || { isLive: false };
 
@@ -91,27 +99,38 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	}, [user, props, user]);
 
 	return (
-		<ChannelItemBody style={props.large ? { width: "100%" } : {}} ref={ref} key={props.passKey}>
-			<ChannelProfilePicture live={isLive}>
-				<img src={props["profile_image_url"] || props.avatar} alt="" />
-			</ChannelProfilePicture>
+		<ChannelItemBody
+			className={`${compactChannels ? "compact" : ""}`}
+			style={props.large ? { width: "100%" } : {}}
+			ref={ref}
+			key={props.passKey}
+		>
+			{!compactChannels ? (
+				<ChannelProfilePicture live={isLive}>
+					<img src={props["profile_image_url"] || props.avatar} alt="" />
+				</ChannelProfilePicture>
+			) : (
+				<LiveIndicator live={isLive} />
+			)}
 			<ChannelInfo>
 				<span className="channel-name">{channelName}</span>
 				<ChannelButtons>
 					<Link href={`/chat/${props.id}`}>
-						<a className="dashboard-link">
-							<OrangeButton className="to-dashboard dashboard-button">Go To Chat</OrangeButton>
+						<a className={`dashboard-link ${compactChannels ? "compact" : ""}`}>
+							<OrangeButton className={`${compactChannels ? "compact" : ""}`}>Go To Chat</OrangeButton>
 						</a>
 					</Link>
-					{!isSmall && (
+					{!isSmall && !compactChannels && (
 						<Link href={`/chat/${props.id}`}>
-							<a className="dashboard-link">
-								<OrangeButton className="to-dashboard dashboard-button">Open in Popout</OrangeButton>
+							<a className={`dashboard-link ${compactChannels ? "compact" : ""}`}>
+								<OrangeButton className={`${compactChannels ? "compact" : ""}`}>
+									Open in Popout
+								</OrangeButton>
 							</a>
 						</Link>
 					)}
 					{!props.isOwned && (
-						<RedButton onClick={removeChannel} className="to-dashboard dashboard-button">
+						<RedButton onClick={removeChannel} className={`${compactChannels ? "compact" : ""}`}>
 							Remove
 						</RedButton>
 					)}

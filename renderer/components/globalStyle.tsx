@@ -174,6 +174,10 @@ const GlobalStyle = createGlobalStyle`
 	.chat-box {
 		padding-bottom: 6rem !important;
 	}
+
+	button.compact {
+		padding: .25rem .5rem;
+	}
 `;
 
 export default GlobalStyle;
