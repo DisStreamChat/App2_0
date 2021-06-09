@@ -23,6 +23,8 @@ import { Tab, TabContainer } from "../../styles/chat.style";
 import { Main } from "../../styles/global.styles";
 import { SearchContainer } from "../settings";
 import useHotkeys from "use-hotkeys";
+import { useEffectOnce, useInterval } from "react-use";
+import { EmoteItem, UserItem } from "../../components/autoFillItem";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -105,6 +107,10 @@ class QueueBuffer {
 const buffer = new QueueBuffer();
 
 const ChatInputContainer = styled.div`
+	.auto-complete-dropdown {
+		max-height: 300px;
+		overflow: auto;
+	}
 	& > img {
 		margin: 0 1rem;
 		width: 30px;
@@ -121,7 +127,7 @@ const ChatInputContainer = styled.div`
 	}
 	cursor: text;
 	z-index: 9;
-	position: absolute;
+	position: fixed;
 	bottom: 15px;
 	left: 50%;
 	transform: translateX(-50%);
@@ -134,8 +140,10 @@ const ChatInputContainer = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+
 	#chat-input {
-		// width: 86%;
+		width: 86%;
+		font-family: Poppins;
 		flex: 1;
 		resize: none;
 		outline: none;
@@ -148,7 +156,8 @@ const ChatInputContainer = styled.div`
 		background: #212121;
 		box-sizing: border-box !important;
 		z-index: 10000;
-
+		/* top: 0;
+		position: absolute; */
 		// min-height: fit-content;
 		&::-webkit-scrollbar {
 			width: 0px;
@@ -184,7 +193,43 @@ const Chat = () => {
 	const [isMod, setIsMod] = useState(false);
 	const [showSearch, setShowSearch] = useState(true);
 	const [chatValue, setChatValue] = useState("");
-	const [showChatBox, setShowChatBox] = useState(false);
+	const [showChatBox, setShowChatBox] = useState(true);
+	const [allChatters, setAllChatters] = useState([]);
+	const [userEmotes, setUserEmotes] = useState([]);
+
+
+	useEffect(() => {
+		(async () => {
+			console.log(user)
+			const apiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/emotes?user=${user?.TwitchName}`;
+			const customApiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/customemotes?channel=${channel?.twitchName}`;
+			let [emotes, customEmotes] = await Promise.all([
+				(async () => {
+					const response = await fetch(apiUrl);
+					return response.json();
+				})(),
+				(async () => {
+					const response = await fetch(customApiUrl);
+					return response.json();
+				})(),
+			]);
+
+			emotes = emotes.emoticon_sets;
+			if (emotes) {
+				let allEmotes = [];
+				for (let [key, value] of Object.entries(emotes) as [string, any]) {
+					allEmotes = [...allEmotes, ...value.map(emote => ({ ...emote, channelId: key }))];
+				}
+				for (const [key, value] of Object.entries(customEmotes?.bttv?.bttvEmotes || {})) {
+					allEmotes.push({ code: key, name: value, char: key, bttv: true });
+				}
+				for (const [key, value] of Object.entries(customEmotes?.ffz?.ffzEmotes || {})) {
+					allEmotes.push({ code: key, name: value, char: key, ffz: true });
+				}
+				setUserEmotes(allEmotes);
+			}
+		})();
+	}, [user, channel]);
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
@@ -248,6 +293,33 @@ const Chat = () => {
 		buffer.push(msg);
 	});
 
+	const getChatters = async () => {
+		if (!channel?.twitchName) return;
+		const chatterUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/chatters?user=${channel?.twitchName}`;
+		const response = await fetch(chatterUrl);
+		const json = await response.json();
+		if (json && response.ok) {
+			const info = {};
+			const chatters = [];
+			for (let [key, value] of Object.entries(json.chatters) as [string, any]) {
+				if (value.length === 0) continue;
+				info[key] = await Promise.all(
+					value.map(async name => {
+						chatters.push(name);
+						return { login: name, id: name };
+					})
+				);
+			}
+			setAllChatters(chatters);
+		}
+	};
+
+	useEffect(() => {
+		getChatters();
+	}, [channel]);
+
+	useInterval(getChatters, 120000 * 2);
+
 	useEffect(() => {
 		if (channel) {
 			buffer.subscribe(msg => {
@@ -283,7 +355,6 @@ const Chat = () => {
 
 	useHotkeys(
 		(key, event, handle) => {
-			console.log(key);
 			switch (key) {
 				case "ctrl+f":
 					setMessageQuery("");
@@ -396,11 +467,11 @@ const Chat = () => {
 					))}
 				</MessageList>
 				<AnimatePresence>
-					{showChatBox && active && (
+					{true && (
 						<motion.div
-							initial={{ opacity: 0, y: -100 }}
+							initial={{ opacity: 0, y: 100 }}
 							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -100 }}
+							exit={{ opacity: 0, y: 100 }}
 							id="chat-input--container"
 							onClick={() => {
 								document.getElementById("chat-input").focus();
@@ -422,38 +493,37 @@ const Chat = () => {
 											}
 										}, 100);
 									}}
-									movePopupAsYouType
+									movePopupAsYouType={true}
 									loadingComponent={() => <span>Loading</span>}
 									minChar={2}
 									listClassName="auto-complete-dropdown"
-									trigger={{}}
-									// trigger={{
-									// 	"@": {
-									// 		dataProvider: token => {
-									// 			return allChatters
-									// 				.filter(chatter => chatter.startsWith(token))
-									// 				.map(chatter => ({ name: `${chatter}`, char: `@${chatter}` }));
-									// 		},
-									// 		component: UserItem,
-									// 		output: (item, trigger) => item.char,
-									// 	},
-									// 	":": {
-									// 		dataProvider: token => {
-									// 			return userEmotes
-									// 				.filter(emote =>
-									// 					emote?.code?.toLowerCase?.()?.includes?.(token?.toLowerCase?.())
-									// 				)
-									// 				.map(emote => ({
-									// 					name: `${emote.id || emote.name}`,
-									// 					char: `${emote.code}`,
-									// 					bttv: emote.bttv,
-									// 					ffz: emote.ffz,
-									// 				}));
-									// 		},
-									// 		component: EmoteItem,
-									// 		output: (item, trigger) => item.char,
-									// 	},
-									// }}
+									trigger={{
+										"@": {
+											dataProvider: token => {
+												return allChatters
+													.filter(chatter => chatter.startsWith(token))
+													.map(chatter => ({ name: `${chatter}`, char: `@${chatter}` }));
+											},
+											component: UserItem,
+											output: (item, trigger) => item.char,
+										},
+										":": {
+											dataProvider: token => {
+												return userEmotes
+													.filter(emote =>
+														emote?.code?.toLowerCase?.()?.includes?.(token?.toLowerCase?.())
+													)
+													.map(emote => ({
+														name: `${emote.id || emote.name}`,
+														char: `${emote.code}`,
+														bttv: emote.bttv,
+														ffz: emote.ffz,
+													}));
+											},
+											component: EmoteItem,
+											output: (item, trigger) => item.char,
+										},
+									}}
 									onKeyPress={e => {
 										if (e.which === 13 && !e.shiftKey) {
 											sendMessage();

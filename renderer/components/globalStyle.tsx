@@ -122,6 +122,55 @@ const GlobalStyle = createGlobalStyle`
 			background: #21212121;
 		}
 	}
+
+	#chat-input--container {
+		position: absolute;
+		bottom: 15px;
+		/* left: 50%; */
+		width: 100vw;
+	}
+
+	.selected-item {
+		background: #212121 !important;
+	}
+
+	.auto-fill-emote-image {
+		max-width: 28px;
+		min-width: 28px;
+	}
+
+	.auto-item {
+		background: #121212;
+		color: white;
+		padding: .125rem 0.25rem;
+		cursor: pointer;
+		display: flex;
+		&:hover,
+		&:focus {
+			background: #212121 !important;
+		}
+		img {
+			margin-right: 0.25rem;
+		}
+	}
+
+	.emote-item {
+		padding: 0.125rem 0.25rem;
+	}
+
+	.rta {
+		width: 100%;
+		display: flex;
+		position: relative;
+	}
+
+	.rta__autocomplete {
+		position: absolute;
+		transform: translateY(1rem);
+		z-index: 1000000000;
+		// max-height: 300px;
+	}
+
 `;
 
 export default GlobalStyle;
