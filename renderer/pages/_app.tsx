@@ -1,11 +1,11 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import GlobalStyle from "../components/globalStyle";
 import styled from "styled-components";
 import Header from "../components/header/header";
 import { useRouter } from "next/router";
 import { remote } from "electron";
-import { AppContextProvider } from "../contexts/appContext";
+import { AppContext, AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
 import { SocketContextProvider } from "../contexts/socketContext";
 
@@ -22,7 +22,8 @@ const Border = styled.div`
 
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
-
+	const { settings } = useContext(AppContext);
+	
 	const router = useRouter();
 	useEffect(() => {
 		(async () => {
@@ -91,19 +92,26 @@ function MyApp({ Component, pageProps }) {
 				<title>DisStreamChat</title>
 			</Head>
 			<GlobalStyle />
-			<AuthContextProvider>
-				<SocketContextProvider>
-					<AppContextProvider>
-						{!router.asPath.includes("settings") && !router.asPath.includes("initial") && windowFocused && (
-							<Border />
-						)}
-						{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
-						<Component {...pageProps} />
-					</AppContextProvider>
-				</SocketContextProvider>
-			</AuthContextProvider>
+			{!router.asPath.includes("settings") &&
+				!router.asPath.includes("initial") &&
+				windowFocused &&
+				settings.ShowBorder && <Border />}
+			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
+			<Component {...pageProps} />
 		</>
 	);
 }
 
-export default MyApp;
+const App = ({ Component, pageProps }) => {
+	return (
+		<AuthContextProvider>
+			<SocketContextProvider>
+				<AppContextProvider>
+					<MyApp Component={Component} pageProps={pageProps}></MyApp>
+				</AppContextProvider>
+			</SocketContextProvider>
+		</AuthContextProvider>
+	);
+};
+
+export default App;

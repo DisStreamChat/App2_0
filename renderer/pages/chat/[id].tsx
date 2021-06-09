@@ -41,9 +41,14 @@ const ChatContainer = styled.div`
 		--tabHeight: 56px;
 	}
 	overflow-x: hidden;
-	::-webkit-scrollbar {
+	&::-webkit-scrollbar {
 		width: 0.25rem;
 		border-radius: 100px;
+	}
+	&.no-scrollbar {
+		&::-webkit-scrollbar {
+			width: 0rem;
+		}
 	}
 	margin-right: 0.15rem;
 `;
@@ -444,7 +449,11 @@ const Chat = () => {
 					</TabContainer>
 				)}
 			</AnimatePresence>
-			<ChatContainer className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""}`}>
+			<ChatContainer
+				className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""} ${
+					!settings?.ShowScrollbar ? "no-scrollbar" : ""
+				}`}
+			>
 				<AnimatePresence>
 					{showSearch && active && (
 						<SearchContainer
@@ -460,7 +469,7 @@ const Chat = () => {
 						</SearchContainer>
 					)}
 				</AnimatePresence>
-				<MessageList className={`${showChatBox && active ? "chat-box": ""}`}>
+				<MessageList className={`${showChatBox && active ? "chat-box" : ""}`}>
 					{flagMatches.map(msg => (
 						<Message {...msg} key={msg.id}></Message>
 					))}
