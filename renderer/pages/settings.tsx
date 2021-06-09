@@ -102,9 +102,7 @@ const Home = () => {
 	const { user } = useAuth();
 
 	const [settings] = useDocumentData(firebaseClient.db.collection("defaults").doc("settings16"));
-
-	console.log(settings)
-
+	
 	useEffect(() => {
 		setDefaultSettings(settings?.settings);
 	}, [settings]);
