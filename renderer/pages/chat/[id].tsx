@@ -35,7 +35,7 @@ const ChatContainer = styled.div`
 	height: calc(100vh - 30px - var(--tabHeight));
 	&.active {
 		transition: height 0.25s;
-		height: calc(100vh - 30px - var(--tabHeight) - 65px);
+		height: calc(100vh - 30px - var(--tabHeight) - 40px);
 	}
 	&.tabs {
 		--tabHeight: 56px;
@@ -197,10 +197,9 @@ const Chat = () => {
 	const [allChatters, setAllChatters] = useState([]);
 	const [userEmotes, setUserEmotes] = useState([]);
 
-
 	useEffect(() => {
 		(async () => {
-			console.log(user)
+			console.log(user);
 			const apiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/emotes?user=${user?.TwitchName}`;
 			const customApiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/customemotes?channel=${channel?.twitchName}`;
 			let [emotes, customEmotes] = await Promise.all([
@@ -461,13 +460,13 @@ const Chat = () => {
 						</SearchContainer>
 					)}
 				</AnimatePresence>
-				<MessageList>
+				<MessageList className={`${showChatBox && active ? "chat-box": ""}`}>
 					{flagMatches.map(msg => (
 						<Message {...msg} key={msg.id}></Message>
 					))}
 				</MessageList>
 				<AnimatePresence>
-					{true && (
+					{showChatBox && active && (
 						<motion.div
 							initial={{ opacity: 0, y: 100 }}
 							animate={{ opacity: 1, y: 0 }}

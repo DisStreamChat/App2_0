@@ -125,7 +125,7 @@ const GlobalStyle = createGlobalStyle`
 
 	#chat-input--container {
 		position: absolute;
-		bottom: 15px;
+		bottom: 10px;
 		/* left: 50%; */
 		width: 100vw;
 	}
@@ -171,6 +171,9 @@ const GlobalStyle = createGlobalStyle`
 		// max-height: 300px;
 	}
 
+	.chat-box {
+		padding-bottom: 6rem !important;
+	}
 `;
 
 export default GlobalStyle;
