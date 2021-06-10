@@ -76,7 +76,7 @@ const settingReducer = (state, action: Action) => {
 
 const SettingsMain = styled.div`
 	padding: 0 2rem;
-	height: 97vh;
+	height: calc(100vh - 30px);
 	overflow: auto;
 `;
 
