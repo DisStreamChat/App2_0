@@ -17,6 +17,8 @@ export const HeaderBody = styled(motion.header)`
 export const IconSection = styled.div`
 	flex: 1;
 	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
 	justify-self: flex-end;
 	justify-content: space-around;
 	max-width: none;
@@ -24,6 +26,9 @@ export const IconSection = styled.div`
 	padding: 0 1rem;
 	align-items: center;
 	&.chat-header {
-		justify-content: space-between;
+		justify-content: space-around;
+		@media screen and (max-width: 450px) {
+			justify-content: center;
+		}
 	}
 `;

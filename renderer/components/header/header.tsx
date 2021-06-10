@@ -36,6 +36,7 @@ const Icons = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 1.5rem;
+	margin-left: 1rem;
 	button {
 		display: flex;
 		align-items: center;
@@ -93,8 +94,6 @@ const Header = () => {
 
 	const stats = useStats(chatUser?.login);
 
-
-
 	const twitchUrl = `https://twitch.tv/${chatUser.display_name?.toLowerCase()}`;
 	if (initial) return <></>;
 
@@ -103,23 +102,25 @@ const Header = () => {
 			{showHeader && (
 				<HeaderBody initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} exit={{ scaleY: 0 }}>
 					<IconSection className={`${chatHeader ? "chat-header" : ""}`}>
-						{!chatHeader ? (
-							<PurpleButton
-								onClick={async () => {
-									await firebaseClient.logout();
-									router.push("/auth");
-								}}
-							>
-								Sign out
-							</PurpleButton>
-						) : (
-							<ChannelInfo>
-								<LiveIndicator live={stats?.isLive} />
-								<a href={twitchUrl} target="_blank">
-									{chatUser.display_name}
-								</a>
-							</ChannelInfo>
-						)}
+						<span>
+							{!chatHeader ? (
+								<PurpleButton
+									onClick={async () => {
+										await firebaseClient.logout();
+										router.push("/auth");
+									}}
+								>
+									Sign out
+								</PurpleButton>
+							) : (
+								<ChannelInfo>
+									<LiveIndicator live={stats?.isLive} />
+									<a href={twitchUrl} target="_blank">
+										{chatUser.display_name}
+									</a>
+								</ChannelInfo>
+							)}
+						</span>
 						<Icons>
 							{chatHeader && (
 								<div className={`${chatHeader ? "chat-icons" : ""}`}>
