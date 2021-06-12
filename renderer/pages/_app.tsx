@@ -23,7 +23,7 @@ const Border = styled.div`
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
 	const { settings } = useContext(AppContext);
-	
+
 	const router = useRouter();
 	useEffect(() => {
 		(async () => {
@@ -66,6 +66,8 @@ function MyApp({ Component, pageProps }) {
 					href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
 					as="style"
 				/>
+				<link rel="preload" href="https://api.disstreamchat.com/fonts" as="style" />
+				<link href="https://api.disstreamchat.com/fonts" rel="stylesheet" />
 				<link
 					href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
 					rel="stylesheet"

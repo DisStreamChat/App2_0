@@ -1,30 +1,31 @@
-import { Message, MessageList, SearchBox } from "disstreamchat-utils";
-import { ipcRenderer } from "electron";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import sha1 from "sha1";
-import styled from "styled-components";
+import { Message, MessageList, SearchBox } from 'disstreamchat-utils';
+import { ipcRenderer } from 'electron';
+import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useInterval } from 'react-use';
+import sha1 from 'sha1';
+import styled from 'styled-components';
+import useHotkeys from 'use-hotkeys';
 
-import { ClickAwayListener } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import CloseIcon from "@material-ui/icons/Close";
-import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
-import { AppContext } from "../../contexts/appContext";
-import { authContext } from "../../contexts/authContext";
-import { useSocketContext } from "../../contexts/socketContext";
-import firebaseClient from "../../firebase/client";
-import handleFlags from "../../functions/flagFunctions";
-import useSocketEvent from "../../hooks/useSocketEvent";
-import { MessageModel } from "../../models/message.model";
-import { ClearButton } from "../../styles/button.styles";
-import { Tab, TabContainer } from "../../styles/chat.style";
-import { Main } from "../../styles/global.styles";
-import { SearchContainer } from "../settings";
-import useHotkeys from "use-hotkeys";
-import { useEffectOnce, useInterval } from "react-use";
-import { EmoteItem, UserItem } from "../../components/autoFillItem";
+import { ClickAwayListener } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import CloseIcon from '@material-ui/icons/Close';
+import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
+
+import { EmoteItem, UserItem } from '../../components/autoFillItem';
+import { AppContext } from '../../contexts/appContext';
+import { authContext } from '../../contexts/authContext';
+import { useSocketContext } from '../../contexts/socketContext';
+import firebaseClient from '../../firebase/client';
+import handleFlags from '../../functions/flagFunctions';
+import useSocketEvent from '../../hooks/useSocketEvent';
+import { MessageModel } from '../../models/message.model';
+import { ClearButton } from '../../styles/button.styles';
+import { Tab, TabContainer } from '../../styles/chat.style';
+import { Main } from '../../styles/global.styles';
+import { SearchContainer } from '../settings';
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -201,6 +202,7 @@ const Chat = () => {
 	const [showChatBox, setShowChatBox] = useState(true);
 	const [allChatters, setAllChatters] = useState([]);
 	const [userEmotes, setUserEmotes] = useState([]);
+	const bodyRef = useRef<HTMLElement>();
 
 	useEffect(() => {
 		(async () => {
@@ -337,7 +339,20 @@ const Chat = () => {
 						badges: msg.badges || {},
 						color: msg.userColor,
 					},
+					streamer: channel.twitchName,
 				};
+				if (settings?.ReverseMessageOrder) {
+					const shouldScroll = Math.abs(bodyRef.current.scrollTop - bodyRef.current.scrollHeight) < 1500;
+					setTimeout(() => {
+						if (shouldScroll) {
+							bodyRef.current.scrollTo({
+								top: bodyRef.current.scrollHeight,
+								behavior: "smooth",
+							});
+						}
+					}, 200);
+				}
+
 				ipcRenderer.send("writeMessage", channel.twitchName, transformedMessage);
 				setMessages(prev => [...prev, transformedMessage]);
 			});
@@ -392,7 +407,10 @@ const Chat = () => {
 	};
 
 	return (
-		<ChatMain animate={{ y: appActive ? 0 : -65 }}>
+		<ChatMain
+			style={{ fontFamily: settings?.Font }}
+			animate={{ y: appActive ? 0 : -65 }}
+		>
 			<AnimatePresence>
 				{settings.ShowTabs && (
 					<TabContainer initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}>
@@ -450,6 +468,8 @@ const Chat = () => {
 				)}
 			</AnimatePresence>
 			<ChatContainer
+				ref={bodyRef as any}
+				style={{ fontFamily: settings?.Font }}
 				className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""} ${
 					!settings?.ShowScrollbar ? "no-scrollbar" : ""
 				}`}
@@ -469,7 +489,10 @@ const Chat = () => {
 						</SearchContainer>
 					)}
 				</AnimatePresence>
-				<MessageList className={`${showChatBox && active ? "chat-box" : ""}`}>
+				<MessageList
+					className={`${showChatBox && active ? "chat-box" : ""}`}
+					style={{ fontFamily: settings?.Font, fontSize: `${settings?.FontScaling || 1}rem` }}
+				>
 					{flagMatches.map(msg => (
 						<Message {...msg} key={msg.id}></Message>
 					))}
