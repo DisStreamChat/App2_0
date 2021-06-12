@@ -428,7 +428,7 @@ const Chat = () => {
 					if (definedSettings.IgnoreSubscriptions && msg.type === "subscription") return false;
 					if (definedSettings.IgnoredUsers?.find(user => user.value === msg.sender.name.toLowerCase()))
 						return false;
-					if (definedSettings.IgnoredCommandPrefixes?.find(prefix => msg.content.startsWith(prefix.value)))
+					if (definedSettings.IgnoredCommandPrefixes?.find(prefix => msg.content.replace(/<[^>]*>?/gm, '').startsWith(prefix.value)))
 						return false;
 					return true;
 				})
