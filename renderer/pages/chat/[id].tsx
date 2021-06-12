@@ -328,7 +328,17 @@ const Chat = () => {
 	useEffect(() => {
 		if (channel) {
 			buffer.subscribe(msg => {
-				console.log(msg);
+				if (msg.replyParentDisplayName) {
+					msg.body =
+						`<span class="reply-header">Replying to ${msg.replyParentDisplayName}: ${msg.replyParentMessageBody}</span>${msg.body}`.replace(
+							`@${msg.replyParentDisplayName}`,
+							""
+						);
+				}
+
+				const nameRegex = new RegExp(`(?<=\\s|^)(@?${user?.name})`, "igm");
+				msg.body = `<p>${msg.body.replace(nameRegex, "<span class='ping'>$&</span>")}</p>`;
+
 				const transformedMessage = {
 					content: msg.body,
 					id: msg.id,
@@ -342,18 +352,22 @@ const Chat = () => {
 						color: msg.userColor,
 					},
 					streamer: channel.twitchName,
+					moddable: true,
 				};
-				if (settings?.ReverseMessageOrder) {
-					const shouldScroll = Math.abs(bodyRef.current.scrollTop - bodyRef.current.scrollHeight) < 1500;
-					setTimeout(() => {
-						if (shouldScroll) {
-							bodyRef.current.scrollTo({
-								top: bodyRef.current.scrollHeight,
-								behavior: "smooth",
-							});
-						}
-					}, 200);
-				}
+
+				transformedMessage.moddable =
+					msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||
+					(!Object.keys(msg.badges).includes("moderator") &&
+						!Object.keys(msg.badges).includes("broadcaster"));
+
+				if (
+					msg.platform !== "discord" &&
+					msg?.displayName?.toLowerCase?.() !== user?.name?.toLowerCase?.() &&
+					channel?.TwitchName?.toLowerCase?.() === user?.name?.toLowerCase?.()
+				)
+					transformedMessage.moddable = true;
+				if (msg.displayName.toLowerCase() === "disstreamchat") transformedMessage.moddable = false;
+				
 
 				ipcRenderer.send("writeMessage", channel.twitchName, transformedMessage);
 				setMessages(prev => [...prev, transformedMessage]);
@@ -402,8 +416,6 @@ const Chat = () => {
 			});
 		}
 	};
-
-	console.log(settings?.IgnoredCommandPrefixes);
 
 	const displayedMessages = useMemo(
 		() =>
