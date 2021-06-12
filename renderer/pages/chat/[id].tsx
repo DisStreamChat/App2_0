@@ -31,16 +31,13 @@ const ChatMain = styled(Main)`
 	flex-direction: column;
 `;
 
+interface ChatContainerProps {
+	tabHeight?: number;
+}
+
 const ChatContainer = styled.div`
-	--tabHeight: 0px;
-	height: calc(100vh - 30px - var(--tabHeight));
-	&.active {
-		transition: height 0.25s;
-		height: calc(100vh - 30px - var(--tabHeight) - 40px);
-	}
-	&.tabs {
-		--tabHeight: 56px;
-	}
+	height: ${(props: ChatContainerProps) => `calc(100vh - 100px - ${props.tabHeight || 0}px)`};
+	transition: height 0.25s;
 	overflow-x: hidden;
 	&::-webkit-scrollbar {
 		width: 0.25rem;
@@ -203,10 +200,10 @@ const Chat = () => {
 	const [allChatters, setAllChatters] = useState([]);
 	const [userEmotes, setUserEmotes] = useState([]);
 	const bodyRef = useRef<HTMLElement>();
+	const tabRef = useRef<HTMLElement>();
 
 	useEffect(() => {
 		(async () => {
-			console.log(user);
 			const apiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/emotes?user=${user?.TwitchName}`;
 			const customApiUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}/customemotes?channel=${channel?.twitchName}`;
 			let [emotes, customEmotes] = await Promise.all([
@@ -357,8 +354,8 @@ const Chat = () => {
 
 				transformedMessage.moddable =
 					msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||
-					(!Object.keys(msg.badges).includes("moderator") &&
-						!Object.keys(msg.badges).includes("broadcaster"));
+					(!Object.keys(msg.badges || {}).includes("moderator") &&
+						!Object.keys(msg.badges || {}).includes("broadcaster"));
 
 				if (
 					msg.platform !== "discord" &&
@@ -367,7 +364,6 @@ const Chat = () => {
 				)
 					transformedMessage.moddable = true;
 				if (msg.displayName.toLowerCase() === "disstreamchat") transformedMessage.moddable = false;
-				
 
 				ipcRenderer.send("writeMessage", channel.twitchName, transformedMessage);
 				setMessages(prev => [...prev, transformedMessage]);
@@ -428,7 +424,11 @@ const Chat = () => {
 					if (definedSettings.IgnoreSubscriptions && msg.type === "subscription") return false;
 					if (definedSettings.IgnoredUsers?.find(user => user.value === msg.sender.name.toLowerCase()))
 						return false;
-					if (definedSettings.IgnoredCommandPrefixes?.find(prefix => msg.content.replace(/<[^>]*>?/gm, '').startsWith(prefix.value)))
+					if (
+						definedSettings.IgnoredCommandPrefixes?.find(prefix =>
+							msg.content.replace(/<[^>]*>?/gm, "").startsWith(prefix.value)
+						)
+					)
 						return false;
 					return true;
 				})
@@ -436,11 +436,18 @@ const Chat = () => {
 		[flagMatches, settings]
 	);
 
+	console.log(tabRef.current)
+
 	return (
 		<ChatMain style={{ fontFamily: settings?.Font }} animate={{ y: appActive ? 0 : -65 }}>
 			<AnimatePresence>
 				{settings.ShowTabs && (
-					<TabContainer initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}>
+					<TabContainer
+						ref={tabRef as any}
+						initial={{ height: 0 }}
+						animate={{ height: "auto" }}
+						exit={{ height: 0 }}
+					>
 						{tabChannels.map(channel => (
 							<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`}>
 								<Link href={`/chat/${channel.id}`}>
@@ -495,6 +502,7 @@ const Chat = () => {
 				)}
 			</AnimatePresence>
 			<ChatContainer
+				tabHeight={tabRef.current?.scrollHeight}
 				ref={bodyRef as any}
 				style={{ fontFamily: settings?.Font }}
 				className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""} ${
