@@ -1,31 +1,31 @@
-import { Message, MessageList, SearchBox } from 'disstreamchat-utils';
-import { ipcRenderer } from 'electron';
-import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useInterval } from 'react-use';
-import sha1 from 'sha1';
-import styled from 'styled-components';
-import useHotkeys from 'use-hotkeys';
+import { Message, MessageList, SearchBox } from "disstreamchat-utils";
+import { ipcRenderer } from "electron";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useInterval } from "react-use";
+import sha1 from "sha1";
+import styled from "styled-components";
+import useHotkeys from "use-hotkeys";
 
-import { ClickAwayListener } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
-import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
+import { ClickAwayListener } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+import ReactTextareaAutocomplete from "@webscopeio/react-textarea-autocomplete";
 
-import { EmoteItem, UserItem } from '../../components/autoFillItem';
-import { AppContext } from '../../contexts/appContext';
-import { authContext } from '../../contexts/authContext';
-import { useSocketContext } from '../../contexts/socketContext';
-import firebaseClient from '../../firebase/client';
-import handleFlags from '../../functions/flagFunctions';
-import useSocketEvent from '../../hooks/useSocketEvent';
-import { MessageModel } from '../../models/message.model';
-import { ClearButton } from '../../styles/button.styles';
-import { Tab, TabContainer } from '../../styles/chat.style';
-import { Main } from '../../styles/global.styles';
-import { SearchContainer } from '../settings';
+import { EmoteItem, UserItem } from "../../components/autoFillItem";
+import { AppContext } from "../../contexts/appContext";
+import { authContext } from "../../contexts/authContext";
+import { useSocketContext } from "../../contexts/socketContext";
+import firebaseClient from "../../firebase/client";
+import handleFlags from "../../functions/flagFunctions";
+import useSocketEvent from "../../hooks/useSocketEvent";
+import { MessageModel } from "../../models/message.model";
+import { ClearButton } from "../../styles/button.styles";
+import { Tab, TabContainer } from "../../styles/chat.style";
+import { Main } from "../../styles/global.styles";
+import { SearchContainer } from "../settings";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -287,7 +287,6 @@ const Chat = () => {
 	}, [channel]);
 
 	useEffect(() => {
-		console.log({ channel });
 		if (channel) {
 			if (socket) {
 				socket.emit("add", channel);
@@ -329,10 +328,13 @@ const Chat = () => {
 	useEffect(() => {
 		if (channel) {
 			buffer.subscribe(msg => {
+				console.log(msg);
 				const transformedMessage = {
 					content: msg.body,
 					id: msg.id,
 					platform: msg.platform,
+					sentAt: msg.sentAt,
+					type: msg.type,
 					sender: {
 						name: msg.displayName,
 						avatar: msg.avatar,
@@ -363,12 +365,7 @@ const Chat = () => {
 	}, [channel]);
 
 	const flagMatches = useMemo(
-		() =>
-			handleFlags(showSearch ? messageQuery : "", [...messages])
-				.filter(msg => !msg.deleted)
-				.filter(msg => (msg.autoMod ? settings.ShowAutomodMessages && isMod : true))
-				.sort((a, b) => a.sentAt - b.sentAt)
-				.map(message => ({ ...message, moddable: message.moddable && isMod })),
+		() => handleFlags(showSearch ? messageQuery : "", [...messages]),
 		[messages, messageQuery, setMessageQuery, isMod, settings, active]
 	);
 
@@ -406,11 +403,29 @@ const Chat = () => {
 		}
 	};
 
+	console.log(settings?.IgnoredCommandPrefixes);
+
+	const displayedMessages = useMemo(
+		() =>
+			flagMatches
+				.filter(msg => {
+					const definedSettings = settings || {};
+					if (definedSettings.IgnoreChannelPoints && msg.type === "channel-points") return false;
+					if (definedSettings.IgnoreCheers && msg.type === "cheer") return false;
+					if (definedSettings.IgnoreFollors && msg.type === "follow") return false;
+					if (definedSettings.IgnoreSubscriptions && msg.type === "subscription") return false;
+					if (definedSettings.IgnoredUsers?.find(user => user.value === msg.sender.name.toLowerCase()))
+						return false;
+					if (definedSettings.IgnoredCommandPrefixes?.find(prefix => msg.content.startsWith(prefix.value)))
+						return false;
+					return true;
+				})
+				.slice(-Math.max(settings?.MessageLimit, 100)),
+		[flagMatches, settings]
+	);
+
 	return (
-		<ChatMain
-			style={{ fontFamily: settings?.Font }}
-			animate={{ y: appActive ? 0 : -65 }}
-		>
+		<ChatMain style={{ fontFamily: settings?.Font }} animate={{ y: appActive ? 0 : -65 }}>
 			<AnimatePresence>
 				{settings.ShowTabs && (
 					<TabContainer initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}>
@@ -493,7 +508,7 @@ const Chat = () => {
 					className={`${showChatBox && active ? "chat-box" : ""}`}
 					style={{ fontFamily: settings?.Font, fontSize: `${settings?.FontScaling || 1}rem` }}
 				>
-					{flagMatches.map(msg => (
+					{displayedMessages.map(msg => (
 						<Message {...msg} key={msg.id}></Message>
 					))}
 				</MessageList>

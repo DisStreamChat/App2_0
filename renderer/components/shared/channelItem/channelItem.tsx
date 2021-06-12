@@ -81,7 +81,6 @@ export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 
 	const compactChannels = settings?.CompactChannels;
 
-	console.log(compactChannels);
 
 	const { isLive } = stats || { isLive: false };
 

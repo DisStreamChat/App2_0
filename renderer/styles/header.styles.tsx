@@ -26,7 +26,7 @@ export const IconSection = styled.div`
 	padding: 0 1rem;
 	align-items: center;
 	&.chat-header {
-		justify-content: space-around;
+		justify-content: space-between;
 		@media screen and (max-width: 450px) {
 			justify-content: center;
 		}
