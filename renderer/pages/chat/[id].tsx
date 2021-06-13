@@ -214,6 +214,7 @@ const Chat = () => {
 
 	const bodyRef = useRef<HTMLElement>();
 	const tabRef = useRef<HTMLElement>();
+	const chatRef = useRef<any>();
 
 	useEffect(() => {
 		(async () => {
@@ -557,6 +558,7 @@ const Chat = () => {
 							>
 								<ChatInputContainer>
 									<ReactTextareaAutocomplete
+										ref={chatRef}
 										onItemHighlighted={({ item }) => {
 											setTimeout(() => {
 												const name = item?.name;
@@ -640,10 +642,20 @@ const Chat = () => {
 						</>
 					)}
 					<EmotePicker
-						onEmoteSelect={emote => setChatValue(prev => `${prev} ${emote.native || emote.name}`)}
+						onEmoteSelect={emote => {
+							const position = chatRef.current.getCaretPosition();
+
+							setChatValue(prev => {
+								const start = prev.slice(0, position);
+								const end = prev.slice(position);
+								const emoteText = emote.native || emote.name;
+								chatRef.current.setCaretPosition(position + emoteText.length)
+								return `${start}${emoteText}${end}`;
+							});
+						}}
 						emotes={userEmotes}
 						onClickAway={() => setEmotePickerVisible(false)}
-						visible={emotePickerVisible }
+						visible={emotePickerVisible}
 					/>
 				</AnimatePresence>
 			</ChatContainer>

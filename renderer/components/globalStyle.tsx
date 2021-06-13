@@ -1,5 +1,5 @@
-import chroma from 'chroma-js';
-import { createGlobalStyle } from 'styled-components';
+import chroma from "chroma-js";
+import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
 	:root{
@@ -177,6 +177,10 @@ const GlobalStyle = createGlobalStyle`
 
 	button.compact {
 		padding: .25rem .5rem;
+	}
+
+	.emoji-mart-search input{
+    	width: 89% !important;
 	}
 `;
 
