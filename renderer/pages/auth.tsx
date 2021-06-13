@@ -71,13 +71,13 @@ const Logo = styled.img`
 const AuthPage = () => {
 	const router = useRouter();
 
-	const [termsChecked, setTermsChecked] = useState(false)
-	const {user} = useAuth()
+	const [termsChecked, setTermsChecked] = useState(false);
+	const { user } = useAuth();
 
 	const loginWithTwitch = async () => {
 		try {
-			if(!termsChecked) return
-			console.log("logging in with twitch ")
+			if (!termsChecked) return;
+			console.log("logging in with twitch ");
 			const id = v4();
 			const oneTimeCodeRef = firebaseClient.db.collection("oneTimeCodes").doc(id);
 
@@ -90,9 +90,7 @@ const AuthPage = () => {
 					router.push("/channels");
 				}
 			});
-			await remote.shell.openExternal(
-				"https://api.disstreamchat.com/oauth/twitch/?otc=" + id
-			);
+			await remote.shell.openExternal("https://api.disstreamchat.com/oauth/twitch/?otc=" + id);
 		} catch (err) {
 			const receiveMessage = async (event, data) => {
 				const json = data;
@@ -108,14 +106,14 @@ const AuthPage = () => {
 		}
 	};
 
-	if(user){
-		router.push("/channels")
-		return null
+	if (user) {
+		router.push("/channels");
+		return null;
 	}
 
-	const submitHandler = (e) => {
+	const submitHandler = e => {
 		e.preventDefault();
-	}
+	};
 
 	return (
 		<AuthContainer>
@@ -142,19 +140,11 @@ const AuthPage = () => {
 						/>
 						<label htmlFor="terms-check">
 							I accept the{" "}
-							<a
-								href="https://disstreamchat.com/terms"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
+							<a href="https://disstreamchat.com/terms" target="_blank" rel="noopener noreferrer">
 								terms and conditions
 							</a>{" "}
 							and{" "}
-							<a
-								href="https://disstreamchat.com/privacy"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
+							<a href="https://disstreamchat.com/privacy" target="_blank" rel="noopener noreferrer">
 								privacy policy
 							</a>
 						</label>
