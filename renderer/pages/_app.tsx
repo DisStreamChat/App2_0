@@ -8,6 +8,7 @@ import { remote } from "electron";
 import { AppContext, AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
 import { SocketContextProvider } from "../contexts/socketContext";
+import { useInterval } from "react-use";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -55,6 +56,17 @@ function MyApp({ Component, pageProps }) {
 			currentWindow.on("key-blur", unfocusHandler);
 		}
 	}, []);
+
+	useInterval(() => {
+		console.log("setting links")
+		const allLinks = [...document.querySelectorAll("a")];
+		for (const link of allLinks) {
+			if (link.hostname != location.hostname) {
+				link.rel = "noopener";
+				link.target = "_blank";
+			}
+		}
+	}, 1000);
 
 	return (
 		<>
