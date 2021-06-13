@@ -58,7 +58,8 @@ function MyApp({ Component, pageProps }) {
 	}, []);
 
 	useInterval(() => {
-		console.log("setting links")
+		// there is an odd error where the socket disconnects when opening external links
+		// this fixes it by making external links open in a new tab
 		const allLinks = [...document.querySelectorAll("a")];
 		for (const link of allLinks) {
 			if (link.hostname != location.hostname) {
