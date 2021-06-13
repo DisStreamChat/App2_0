@@ -1,20 +1,25 @@
-import { SearchBox } from 'disstreamchat-utils';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import React, { forwardRef, useCallback, useContext, useState } from 'react';
+import { SearchBox } from "disstreamchat-utils";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { forwardRef, useCallback, useContext, useState } from "react";
 
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from "@material-ui/core";
 
-import { AppContext } from '../../../contexts/appContext';
-import { authContext } from '../../../contexts/authContext';
-import firebaseClient from '../../../firebase/client';
-import { useStats } from '../../../hooks/useStats';
-import { ChannelModel } from '../../../models/channel.model';
-import { OrangeButton, RedButton } from '../../../styles/button.styles';
-import { LiveIndicator } from '../ui-components/LiveIndicator';
+import { AppContext } from "../../../contexts/appContext";
+import { authContext } from "../../../contexts/authContext";
+import firebaseClient from "../../../firebase/client";
+import { useStats } from "../../../hooks/useStats";
+import { ChannelModel } from "../../../models/channel.model";
+import { OrangeButton, RedButton } from "../../../styles/button.styles";
+import { LiveIndicator } from "../ui-components/LiveIndicator";
 import {
-    ChannelButtons, ChannelInfo, ChannelItemBody, ChannelProfilePicture, ChannelSearchBody, ChannelSearchSection
-} from './channelItem.style';
+	ChannelButtons,
+	ChannelInfo,
+	ChannelItemBody,
+	ChannelProfilePicture,
+	ChannelSearchBody,
+	ChannelSearchSection,
+} from "./channelItem.style";
 
 interface ChannelProps extends Omit<ChannelModel, "order"> {
 	isOwned?: boolean;
@@ -25,26 +30,41 @@ interface ChannelProps extends Omit<ChannelModel, "order"> {
 export const ChannelSearchItem = React.memo(() => {
 	const [search, setSearch] = useState("");
 	const { setSavedChannels } = useContext(AppContext);
+	const [searching, setSearching] = useState(false);
 	const { user } = useContext(authContext);
 	const router = useRouter();
+	const [notFound, setNotFound] = useState(false);
 
-	const resetSearch = () => setSearch("");
+	const resetSearch = (hard = true) => {
+		if (hard) setNotFound(false);
+		setSearch("");
+	};
 
 	const submit = async e => {
 		e.preventDefault();
-		const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`);
-		const json = await response.json();
-		if (json.exists) {
-			const { data } = json;
-			const { profile_image_url, display_name, id } = data;
-			setSavedChannels(prev => {
-				if (prev.find(channel => channel.id === id)) return prev;
-				const newList = [...prev, { name: display_name, avatar: profile_image_url, id, order: Infinity }];
-				firebaseClient.db.collection("Streamers").doc(user.uid).update({ ModChannels: newList });
-				return newList;
-			});
+		setSearching(true);
+		setNotFound(false);
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${search}`);
+			const json = await response.json();
+			setSearching(false);
+			if (json.exists) {
+				const { data } = json;
+				const { profile_image_url, display_name, id } = data;
+				setSavedChannels(prev => {
+					if (prev.find(channel => channel.id === id)) return prev;
+					router.push(`chat/${id}`);
+					const newList = [...prev, { name: display_name, avatar: profile_image_url, id, order: Infinity }];
+					firebaseClient.db.collection("Streamers").doc(user.uid).update({ ModChannels: newList });
+					return newList;
+				});
+			} else {
+				setNotFound(true);
+			}
+		} catch (err) {
+			setNotFound(true);
 		}
-		resetSearch();
+		resetSearch(false);
 	};
 
 	return (
@@ -57,25 +77,24 @@ export const ChannelSearchItem = React.memo(() => {
 					onChange={setSearch}
 					resetSearch={resetSearch}
 				/>
-				<OrangeButton>Submit</OrangeButton>
+				<OrangeButton>{searching ? "Searching" : "Submit"}</OrangeButton>
 			</ChannelSearchSection>
+			{notFound && <h2>Channel not found</h2>}
 		</ChannelSearchBody>
 	);
 });
 
 export const ChannelItem = forwardRef((props: ChannelProps, ref: any) => {
 	const [channelName, setChannelName] = useState(props.name);
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
 	const { user } = useContext(authContext);
 	const { setSavedChannels, settings } = useContext(AppContext);
+	const router = useRouter();
 
 	const isSmall = useMediaQuery("(max-width: 750px)");
 
 	const stats = useStats(props.name);
 
 	const compactChannels = settings?.CompactChannels;
-
 
 	const { isLive } = stats || { isLive: false };
 
