@@ -466,6 +466,7 @@ const Chat = () => {
 									<a>{channel.name}</a>
 								</Link>
 								<CloseIcon
+									style={{ cursor: "pointer" }}
 									onClick={() => {
 										setTabChannels(prev => prev.filter(c => c.id !== channel.id));
 									}}
@@ -649,7 +650,7 @@ const Chat = () => {
 								const start = prev.slice(0, position);
 								const end = prev.slice(position);
 								const emoteText = emote.native || emote.name;
-								chatRef.current.setCaretPosition(position + emoteText.length)
+								chatRef.current.setCaretPosition(position + emoteText.length);
 								return `${start}${emoteText}${end}`;
 							});
 						}}
