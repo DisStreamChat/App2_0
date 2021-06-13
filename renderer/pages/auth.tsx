@@ -1,12 +1,10 @@
 import styled from "styled-components";
 import { DiscordButton, TwitchButton } from "../styles/button.styles";
 import firebaseClient from "../firebase/client";
-import { useRouter, Router } from "next/router";
+import { useRouter } from "next/router";
 const { ipcRenderer, remote } = require("electron");
 import { v4 } from "uuid";
 import nookies from "nookies";
-import { verifyIdToken } from "../firebase/admin";
-import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { useAuth } from "../contexts/authContext";
 

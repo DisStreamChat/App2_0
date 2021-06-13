@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, createContext } from "react";
-import nookies, { parseCookies, destroyCookie } from "nookies";
+import nookies from "nookies";
 import firebaseClient from "../firebase/client";
 import { userModel } from "../models/user.model";
 
