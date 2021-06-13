@@ -5,11 +5,11 @@ export const Tab = styled.div`
 	background: #212121;
 	/* color: black; */
 	height: 28px;
-	clip-path: polygon(0 0, 80% 0, 100% 100%, 0% 100%);
+	clip-path: polygon(1rem 0%, 100% 0%, 100% 100%, 0 100%, 0 1rem);
 	font-size: 75%;
 	border-bottom: none;
 	border-radius: 0.25rem 0 0px 0px;
-	padding-right: 1.25rem;
+	padding-left: .75rem;
 	display: flex;
 	align-items: center;
 	svg {
