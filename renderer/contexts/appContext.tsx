@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { ChannelModel } from "../models/channel.model";
 import { authContext } from "./authContext";
 import firebaseClient from "../firebase/client";
@@ -27,7 +27,8 @@ export interface AppContextModel {
 	appActive: boolean;
 	windowFocused: boolean;
 	setWindowFocused: React.Dispatch<React.SetStateAction<boolean>>;
-	active: boolean
+	active: boolean;
+	titleBarRef: any;
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -41,6 +42,7 @@ export const AppContextProvider = props => {
 	let doc = typeof window === "undefined" ? {} : (document as any);
 	const [appHovered] = useInteraction({ current: doc?.body } as any);
 	const [windowFocused, setWindowFocused] = useState(false);
+	const titleBarRef = useRef();
 
 	const uid = user?.uid;
 	const twitchId = user?.twitchId;
@@ -94,6 +96,7 @@ export const AppContextProvider = props => {
 	return (
 		<AppContext.Provider
 			value={{
+				titleBarRef,
 				windowFocused,
 				setWindowFocused,
 				active: appHovered || windowFocused,

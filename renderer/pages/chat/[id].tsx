@@ -200,7 +200,8 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const [addingChannel, setAddingChannel] = useState(false);
-	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active } = useContext(AppContext);
+	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, titleBarRef } =
+		useContext(AppContext);
 	const { user } = useContext(authContext);
 	const [messageQuery, setMessageQuery] = useState("");
 	const [isMod, setIsMod] = useState(false);
@@ -215,6 +216,11 @@ const Chat = () => {
 	const bodyRef = useRef<HTMLElement>();
 	const tabRef = useRef<HTMLElement>();
 	const chatRef = useRef<any>();
+
+	useEffect(() => {
+		console.log(channel);
+		titleBarRef?.current?.updateTitle?.(`DisStreamChat - ${channel.twitchName || ""}`);
+	}, [titleBarRef, channel]);
 
 	useEffect(() => {
 		(async () => {

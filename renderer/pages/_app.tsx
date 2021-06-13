@@ -4,7 +4,7 @@ import GlobalStyle from "../components/globalStyle";
 import styled from "styled-components";
 import Header from "../components/header/header";
 import { useRouter } from "next/router";
-import { remote } from "electron";
+import { MenuItem, MenuItemConstructorOptions, remote } from "electron";
 import { AppContext, AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
 import { SocketContextProvider } from "../contexts/socketContext";
@@ -23,7 +23,7 @@ const Border = styled.div`
 
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
-	const { settings } = useContext(AppContext);
+	const { settings, titleBarRef } = useContext(AppContext);
 
 	const router = useRouter();
 	useEffect(() => {
@@ -31,13 +31,61 @@ function MyApp({ Component, pageProps }) {
 			if (typeof window !== "undefined" && !router.asPath.includes("initial")) {
 				if (document.querySelector(".titlebar")) return;
 				const customTitlebar = await import("custom-electron-titlebar");
-				let MyTitleBar = new customTitlebar.Titlebar({
+				const template: (MenuItemConstructorOptions | MenuItem)[] = [
+					{
+						label: "View",
+						submenu: [
+							{
+								label: "Always on Top",
+								type: "checkbox",
+							},
+							{
+								label: "Channel Info",
+							},
+							{
+								label: "Channel Options",
+							},
+						],
+					},
+					{
+						label: "Extras",
+						submenu: [
+							{
+								label: "Emotes",
+							},
+							{
+								label: "Followers",
+							},
+							{
+								label: "Subscribers",
+							},
+						],
+					},
+					{
+						label: "Help",
+						submenu: [
+							{
+								label: "Website",
+							},
+							{
+								label: "About/Help",
+							},
+							{
+								label: "Check for updates",
+							},
+						],
+					},
+				];
+				const menu = remote.Menu.buildFromTemplate(template);
+
+				let myTitleBar = new customTitlebar.Titlebar({
 					backgroundColor: customTitlebar.Color.fromHex("#17181ba1"),
-					menu: null,
 					maximizable: false,
+					menu,
 				});
-				MyTitleBar.updateTitle("DisStreamChat");
-				MyTitleBar.setHorizontalAlignment("left");
+				titleBarRef.current = myTitleBar;
+				myTitleBar.updateTitle("DisStreamChat");
+				myTitleBar.setHorizontalAlignment("center");
 			}
 		})();
 	}, []);

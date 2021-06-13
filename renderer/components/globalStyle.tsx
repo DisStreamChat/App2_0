@@ -182,6 +182,12 @@ const GlobalStyle = createGlobalStyle`
 	.emoji-mart-search input{
     	width: 89% !important;
 	}
+
+	.titlebar {
+		& * {
+			z-index: 99999999999;
+		}
+	}
 `;
 
 export default GlobalStyle;
