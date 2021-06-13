@@ -1,5 +1,5 @@
-import { createGlobalStyle } from "styled-components";
-import chroma from "chroma-js";
+import chroma from 'chroma-js';
+import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
 	:root{

@@ -1,25 +1,20 @@
-import { SearchBox } from "disstreamchat-utils";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import React, { forwardRef, useCallback, useContext, useState } from "react";
+import { SearchBox } from 'disstreamchat-utils';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { forwardRef, useCallback, useContext, useState } from 'react';
 
-import { useMediaQuery } from "@material-ui/core";
+import { useMediaQuery } from '@material-ui/core';
 
-import { AppContext } from "../../../contexts/appContext";
-import { authContext } from "../../../contexts/authContext";
-import firebaseClient from "../../../firebase/client";
-import { useStats } from "../../../hooks/useStats";
-import { ChannelModel } from "../../../models/channel.model";
-import { OrangeButton, RedButton } from "../../../styles/button.styles";
+import { AppContext } from '../../../contexts/appContext';
+import { authContext } from '../../../contexts/authContext';
+import firebaseClient from '../../../firebase/client';
+import { useStats } from '../../../hooks/useStats';
+import { ChannelModel } from '../../../models/channel.model';
+import { OrangeButton, RedButton } from '../../../styles/button.styles';
+import { LiveIndicator } from '../ui-components/LiveIndicator';
 import {
-	ChannelButtons,
-	ChannelInfo,
-	ChannelItemBody,
-	ChannelProfilePicture,
-	ChannelSearchBody,
-	ChannelSearchSection,
-} from "./channelItem.style";
-import { LiveIndicator } from "../ui-components/LiveIndicator";
+    ChannelButtons, ChannelInfo, ChannelItemBody, ChannelProfilePicture, ChannelSearchBody, ChannelSearchSection
+} from './channelItem.style';
 
 interface ChannelProps extends Omit<ChannelModel, "order"> {
 	isOwned?: boolean;
