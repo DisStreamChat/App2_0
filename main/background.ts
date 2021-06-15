@@ -37,6 +37,10 @@ const startMainWindow = () => {
 	mainWindow.loadURL(baseUrl("auth"));
 	mainWindow.on("focus", () => sendMessageToWindow("focus", true, mainWindow))
 	mainWindow.on("blur", () => sendMessageToWindow("focus", false, mainWindow))
+
+	ipcMain.on("setAlwaysOnTop", (event, alwaysOnTop: boolean) => {
+		mainWindow.setAlwaysOnTop(alwaysOnTop)
+	})
 };
 let loadingWindow;
 (async () => {
@@ -118,11 +122,13 @@ ipcMain.on("writeMessage", async (event, channelName, message) => {
 	await writeMessages(channelName, [...oldMessages, message]);
 });
 
+
+
 ipcMain.once("app-ready", () => {
 	startMainWindow();
 	setTimeout(() => {
 		loadingWindow.close();
-	}, 500);
+	}, 700);
 });
 
 app.on("window-all-closed", () => {

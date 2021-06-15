@@ -256,7 +256,7 @@ const Chat = () => {
 
 	useSocketEvent(socket, "connect", () => {
 		if (channel) {
-			socket.emit("add", channel);
+			socket.emit("add", { ...channel, leaveAll: true });
 		}
 	});
 
@@ -306,7 +306,7 @@ const Chat = () => {
 	useEffect(() => {
 		if (channel) {
 			if (socket) {
-				socket.emit("add", channel);
+				socket.emit("add", { ...channel, leaveAll: true });
 			}
 		}
 	}, [channel, socket]);

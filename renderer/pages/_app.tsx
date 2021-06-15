@@ -7,8 +7,10 @@ import { useRouter } from "next/router";
 import { MenuItem, MenuItemConstructorOptions, remote } from "electron";
 import { AppContext, AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
-import { SocketContextProvider } from "../contexts/socketContext";
+import { SocketContextProvider, useSocketContext } from "../contexts/socketContext";
 import { useInterval } from "react-use";
+import useSocketEvent from "../hooks/useSocketEvent";
+import { ipcRenderer } from "electron";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -24,6 +26,7 @@ const Border = styled.div`
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
 	const { settings, titleBarRef } = useContext(AppContext);
+	const { socket } = useSocketContext();
 
 	const router = useRouter();
 	useEffect(() => {
@@ -38,12 +41,16 @@ function MyApp({ Component, pageProps }) {
 							{
 								label: "Always on Top",
 								type: "checkbox",
+								click: ({ checked }) => ipcRenderer.send("setAlwaysOnTop", checked),
 							},
 							{
 								label: "Channel Info",
 							},
 							{
 								label: "Channel Options",
+							},
+							{
+								label: "Filters",
 							},
 						],
 					},
@@ -89,6 +96,20 @@ function MyApp({ Component, pageProps }) {
 			}
 		})();
 	}, []);
+
+	useEffect(() => {
+		if (socket) {
+			socket.emit("add", {
+				twitchName: "dscnotifications",
+			});
+		}
+	}, [socket]);
+
+	useSocketEvent(socket, "left-all", () => {
+		socket.emit("add", {
+			twitchName: "dscnotifications",
+		});
+	});
 
 	const currentWindow = remote?.getCurrentWindow?.();
 
