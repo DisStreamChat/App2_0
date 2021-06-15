@@ -51,6 +51,7 @@ function MyApp({ Component, pageProps }) {
 							},
 							{
 								label: "Filters",
+								click: () => ipcRenderer.send("open-filters"),
 							},
 						],
 					},

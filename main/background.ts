@@ -35,12 +35,12 @@ const startMainWindow = () => {
 	});
 
 	mainWindow.loadURL(baseUrl("auth"));
-	mainWindow.on("focus", () => sendMessageToWindow("focus", true, mainWindow))
-	mainWindow.on("blur", () => sendMessageToWindow("focus", false, mainWindow))
+	mainWindow.on("focus", () => sendMessageToWindow("focus", true, mainWindow));
+	mainWindow.on("blur", () => sendMessageToWindow("focus", false, mainWindow));
 
 	ipcMain.on("setAlwaysOnTop", (event, alwaysOnTop: boolean) => {
-		mainWindow.setAlwaysOnTop(alwaysOnTop)
-	})
+		mainWindow.setAlwaysOnTop(alwaysOnTop);
+	});
 };
 let loadingWindow;
 (async () => {
@@ -97,6 +97,23 @@ ipcMain.on("open-settings", (event, arg) => {
 	settingsWindow.on("close", () => (settingsWindow = null));
 });
 
+let filtersWindow: Electron.BrowserWindow | null = null;
+ipcMain.on("open-filters", () => {
+	if (filtersWindow) {
+		if (filtersWindow.isMinimized()) filtersWindow.restore();
+		filtersWindow.focus();
+		return;
+	}
+	filtersWindow = createWindow("filters", {
+		width: 500,
+		height: 500,
+		transparent: false,
+		backgroundColor: "#2a2c30",
+	});
+	filtersWindow.loadURL(baseUrl("filters"));
+	filtersWindow.on("close", () => (filtersWindow = null));
+});
+
 ipcMain.on("clear-hotkeys", () => {
 	hotKeyManager.unregisterAll();
 });
@@ -121,8 +138,6 @@ ipcMain.on("writeMessage", async (event, channelName, message) => {
 	const oldMessages = await getMessages(channelName);
 	await writeMessages(channelName, [...oldMessages, message]);
 });
-
-
 
 ipcMain.once("app-ready", () => {
 	startMainWindow();
