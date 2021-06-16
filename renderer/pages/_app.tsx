@@ -51,7 +51,11 @@ function MyApp({ Component, pageProps }) {
 							},
 							{
 								label: "Filters",
-								click: () => ipcRenderer.send("open-filters"),
+								click: () => ipcRenderer.send("open-menu", "filter"),
+							},
+							{
+								label: "Highlights and Mentions",
+								click: () => ipcRenderer.send("open-menu", "highlights"),
 							},
 						],
 					},
