@@ -22,7 +22,7 @@ const Border = styled.div`
 	pointer-events: none;
 `;
 
-const menuPaths = ["channels", "chat"];
+const mainPaths = ["channels", "chat"];
 
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
@@ -94,7 +94,7 @@ function MyApp({ Component, pageProps }) {
 				let myTitleBar = new customTitlebar.Titlebar({
 					backgroundColor: customTitlebar.Color.fromHex("#17181ba1"),
 					maximizable: false,
-					menu: menuPaths.find(menuPath => {
+					menu: mainPaths.find(menuPath => {
 						return router.asPath.includes(menuPath);
 					})
 						? menu
@@ -192,11 +192,8 @@ function MyApp({ Component, pageProps }) {
 				<title>DisStreamChat</title>
 			</Head>
 			<GlobalStyle />
-			{!router.asPath.includes("settings") &&
-				!router.asPath.includes("initial") &&
-				windowFocused &&
-				settings.ShowBorder && <Border />}
-			{!router.asPath.includes("auth") && !router.asPath.includes("settings") && <Header />}
+			{mainPaths.find(path => router.asPath.includes(path)) && windowFocused && settings.ShowBorder && <Border />}
+			{mainPaths.find(path => router.asPath.includes(path)) && <Header />}
 			<Component {...pageProps} />
 		</>
 	);
