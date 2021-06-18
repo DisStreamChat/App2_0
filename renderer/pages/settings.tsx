@@ -1,13 +1,14 @@
-import { BooleanSetting, ColorSetting, ListSetting, RangeSetting, SearchBox, SelectSetting } from 'disstreamchat-utils';
-import { isEqual } from 'lodash';
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
-import { useDocumentData } from 'react-firebase-hooks/firestore';
-import styled from 'styled-components';
+import { BooleanSetting, ColorSetting, ListSetting, RangeSetting, SearchBox, SelectSetting } from "disstreamchat-utils";
+import { isEqual } from "lodash";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
+import { useDocumentData } from "react-firebase-hooks/firestore";
+import styled from "styled-components";
 
-import { SaveBar } from '../components/shared/ui-components/SaveBar';
-import { useAuth } from '../contexts/authContext';
-import firebaseClient from '../firebase/client';
-import {motion} from "framer-motion"
+import { SaveBar } from "../components/shared/ui-components/SaveBar";
+import { useAuth } from "../contexts/authContext";
+import firebaseClient from "../firebase/client";
+import { motion } from "framer-motion";
+import { useTitle } from "../hooks/useTitle";
 
 interface Setting {
 	category: string;
@@ -99,10 +100,11 @@ export const SearchContainer = styled(motion.div)`
 const Home = () => {
 	const [search, setSearch] = useState("");
 	const [defaultSettings, setDefaultSettings] = useState([]);
+	useTitle("Settings");
 	const { user } = useAuth();
 
 	const [settings] = useDocumentData(firebaseClient.db.collection("defaults").doc("settings16"));
-	
+
 	useEffect(() => {
 		setDefaultSettings(settings?.settings);
 	}, [settings]);
