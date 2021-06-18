@@ -9,7 +9,6 @@ import { AppContext, AppContextProvider } from "../contexts/appContext";
 import { AuthContextProvider } from "../contexts/authContext";
 import { SocketContextProvider, useSocketContext } from "../contexts/socketContext";
 import { useInterval } from "react-use";
-import useSocketEvent from "../hooks/useSocketEvent";
 import { ipcRenderer } from "electron";
 
 const Border = styled.div`
@@ -23,12 +22,14 @@ const Border = styled.div`
 	pointer-events: none;
 `;
 
+const menuPaths = ["channels", "chat"];
+
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
 	const { settings, titleBarRef } = useContext(AppContext);
 	const { socket } = useSocketContext();
-
 	const router = useRouter();
+
 	useEffect(() => {
 		(async () => {
 			if (typeof window !== "undefined" && !router.asPath.includes("initial")) {
@@ -51,7 +52,7 @@ function MyApp({ Component, pageProps }) {
 							},
 							{
 								label: "Filters",
-								click: () => ipcRenderer.send("open-menu", "filter"),
+								click: () => ipcRenderer.send("open-menu", "filters"),
 							},
 							{
 								label: "Highlights and Mentions",
@@ -93,7 +94,11 @@ function MyApp({ Component, pageProps }) {
 				let myTitleBar = new customTitlebar.Titlebar({
 					backgroundColor: customTitlebar.Color.fromHex("#17181ba1"),
 					maximizable: false,
-					menu,
+					menu: menuPaths.find(menuPath => {
+						return router.asPath.includes(menuPath);
+					})
+						? menu
+						: null,
 				});
 				titleBarRef.current = myTitleBar;
 				myTitleBar.updateTitle("DisStreamChat");

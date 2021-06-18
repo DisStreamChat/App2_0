@@ -7,6 +7,7 @@ import { useDocumentData } from "react-firebase-hooks/firestore";
 import { SettingsDocument, Settings } from "../models/settings.model";
 import { apiFetch } from "../functions/fetching";
 import { useInteraction } from "../hooks/useInteraction";
+import { Titlebar } from "custom-electron-titlebar/titlebar";
 
 interface TwitchDetails {
 	login: string;
@@ -28,7 +29,7 @@ export interface AppContextModel {
 	windowFocused: boolean;
 	setWindowFocused: React.Dispatch<React.SetStateAction<boolean>>;
 	active: boolean;
-	titleBarRef: any;
+	titleBarRef: React.MutableRefObject<Titlebar>;
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -42,7 +43,7 @@ export const AppContextProvider = props => {
 	let doc = typeof window === "undefined" ? {} : (document as any);
 	const [appHovered] = useInteraction({ current: doc?.body } as any);
 	const [windowFocused, setWindowFocused] = useState(false);
-	const titleBarRef = useRef();
+	const titleBarRef = useRef<Titlebar>();
 
 	const uid = user?.uid;
 	const twitchId = user?.twitchId;

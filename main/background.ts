@@ -97,21 +97,23 @@ ipcMain.on("open-settings", (event, arg) => {
 	settingsWindow.on("close", () => (settingsWindow = null));
 });
 
-let filtersWindow: Electron.BrowserWindow | null = null;
-ipcMain.on("open-filters", () => {
-	if (filtersWindow) {
-		if (filtersWindow.isMinimized()) filtersWindow.restore();
-		filtersWindow.focus();
+let menuWindows: { [key: string]: Electron.BrowserWindow | null } = {};
+ipcMain.on("open-menu", (event, path) => {
+	let menuWindow = menuWindows[path];
+	if (menuWindow) {
+		if (menuWindow.isMinimized()) menuWindow.restore();
+		menuWindow.focus();
 		return;
 	}
-	filtersWindow = createWindow("filters", {
+	menuWindow = createWindow(path, {
 		width: 500,
 		height: 500,
 		transparent: false,
 		backgroundColor: "#2a2c30",
 	});
-	filtersWindow.loadURL(baseUrl("filters"));
-	filtersWindow.on("close", () => (filtersWindow = null));
+	menuWindows[path] = menuWindow;
+	menuWindow.loadURL(baseUrl(path));
+	menuWindow.on("close", () => (menuWindows[path] = null));
 });
 
 ipcMain.on("clear-hotkeys", () => {
