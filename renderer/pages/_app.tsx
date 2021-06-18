@@ -102,19 +102,25 @@ function MyApp({ Component, pageProps }) {
 		})();
 	}, []);
 
-	useEffect(() => {
-		if (socket) {
-			socket.emit("add", {
-				twitchName: "dscnotifications",
-			});
-		}
-	}, [socket]);
+	// useEffect(() => {
+	// 	if (socket) {
+	// 		socket.emit("add", {
+	// 			twitchName: "dscnotifications",
+	// 		});
+	// 	}
+	// }, [socket]);
 
-	useSocketEvent(socket, "left-all", () => {
-		socket.emit("add", {
-			twitchName: "dscnotifications",
-		});
-	});
+	// useSocketEvent(socket, "left-all", () => {
+	// 	socket.emit("add", {
+	// 		twitchName: "dscnotifications",
+	// 	});
+	// });
+
+	// useSocketEvent(socket, "connect", () => {
+	// 	socket.emit("add", {
+	// 		twitchName: "dscnotifications",
+	// 	});
+	// });
 
 	const currentWindow = remote?.getCurrentWindow?.();
 
