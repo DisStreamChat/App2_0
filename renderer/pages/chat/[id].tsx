@@ -31,6 +31,7 @@ import EmotePicker from "../../components/shared/emotePicker";
 import { HandleFilters } from "../../functions/filter.util";
 import { useTitle } from "../../hooks/useTitle";
 import { TabItem } from "../../components/TabItem";
+import { shouldHighlight } from "../../functions/highlight.util";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -203,8 +204,7 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const [addingChannel, setAddingChannel] = useState(false);
-	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, titleBarRef, filters } =
-		useContext(AppContext);
+	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, filters } = useContext(AppContext);
 	const { user } = useContext(authContext);
 	const [messageQuery, setMessageQuery] = useState("");
 	const [isMod, setIsMod] = useState(false);
@@ -322,7 +322,7 @@ const Chat = () => {
 
 		// const nameRegex = new RegExp(`(?<=\\s|^)(@?${user?.name})`, "igm");
 
-		const transformedMessage = {
+		const transformedMessage: MessageModel = {
 			content: msg.body,
 			id: msg.id,
 			platform: msg.platform,
@@ -337,7 +337,10 @@ const Chat = () => {
 			streamer: msg.channel,
 			moddable: true,
 			read: false,
+			highlighted: false,
 		};
+
+		transformedMessage.highlighted = shouldHighlight(msg);
 
 		transformedMessage.moddable =
 			msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||

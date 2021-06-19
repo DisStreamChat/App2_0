@@ -20,9 +20,13 @@ export enum HighlightType {
 }
 
 export interface Highlight {
-	type: HighlightType,
-	text: string,
+	type: HighlightType;
+	text: string;
 	active: boolean;
 	color: string;
 	regex: boolean;
+}
+
+export interface Highlights {
+	[key: string]: Highlight;
 }

@@ -1,4 +1,4 @@
-import { Filter } from "./filter.model";
+import { Filters, Highlights } from "./filter.model";
 
 export interface Setting<T = string> {
 	category: string;
@@ -20,5 +20,6 @@ export interface Settings {
 
 export interface SettingsDocument {
 	appSettings: Settings;
-	filters: { [key: string]: Filter };
+	filters: Filters;
+	highlights: Highlights;
 }

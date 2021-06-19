@@ -49,9 +49,8 @@ export const AppContextProvider = props => {
 
 	const uid = user?.uid;
 	const twitchId = user?.twitchId;
-	const [{ appSettings: settings, filters } = { appSettings: {}, filters: {} }] = useDocumentData<SettingsDocument>(
-		firebaseClient.db.collection("Streamers").doc(uid || " ")
-	);
+	const [{ appSettings: settings, filters, highlights } = { appSettings: {}, filters: {}, highlights: {} }] =
+		useDocumentData<SettingsDocument>(firebaseClient.db.collection("Streamers").doc(uid || " "));
 
 	useEffect(() => {
 		ipcRenderer.on("focus", (event, data) => setWindowFocused(data));

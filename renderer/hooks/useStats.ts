@@ -18,12 +18,12 @@ export const useStats = (channelName: string): StatsModel => {
 		let interval;
 		if (channelName && channelName !== "undefined") {
 			getStats();
-			interval = setInterval(getStats, 6000*2);
+			interval = setInterval(getStats, 6000 * 2);
 		}
 		return () => {
 			clearInterval(interval);
 		};
 	}, [channelName]);
 
-	return stats;
+	return stats || { isLive: false, viewer_count: 0 };
 };

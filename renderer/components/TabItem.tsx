@@ -16,11 +16,11 @@ export interface TabItemProps {
 export const TabItem = ({ channel, id }: TabItemProps) => {
 	const { setTabChannels } = useContext(AppContext);
 	const { socket } = useSocketContext();
-	const { isLive } = useStats(channel.name);
+	const stats = useStats(channel.name);
 
 	return (
 		<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`} hasUnreadMessages={true} hasHighlightMatches={false}>
-			<LiveIndicator live={isLive} />
+			<LiveIndicator live={stats?.isLive} />
 			<Link href={`/chat/${channel.id}`}>
 				<a>{channel.name}</a>
 			</Link>
