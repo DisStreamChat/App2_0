@@ -1,21 +1,24 @@
+import { Filter } from "./filter.model";
+
 export interface Setting<T = string> {
-	category: string,
+	category: string;
 	type: string;
 	value: T;
 	description: string;
 	appOnly?: boolean;
-	min?: number,
-	max?: number,
+	min?: number;
+	max?: number;
 }
 
 export interface DefualtSettings {
-	[key: string]: Setting
+	[key: string]: Setting;
 }
 
 export interface Settings {
-	[key: string]: any
+	[key: string]: any;
 }
 
 export interface SettingsDocument {
-	appSettings: Settings
+	appSettings: Settings;
+	filters: { [key: string]: Filter };
 }

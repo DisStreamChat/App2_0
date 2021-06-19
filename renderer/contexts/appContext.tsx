@@ -8,6 +8,7 @@ import { SettingsDocument, Settings } from "../models/settings.model";
 import { apiFetch } from "../functions/fetching";
 import { useInteraction } from "../hooks/useInteraction";
 import { Titlebar } from "custom-electron-titlebar/titlebar";
+import { Filter } from "../models/filter.model";
 
 interface TwitchDetails {
 	login: string;
@@ -30,6 +31,7 @@ export interface AppContextModel {
 	setWindowFocused: React.Dispatch<React.SetStateAction<boolean>>;
 	active: boolean;
 	titleBarRef: React.MutableRefObject<Titlebar>;
+	filters: { [key: string]: Filter };
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -47,7 +49,7 @@ export const AppContextProvider = props => {
 
 	const uid = user?.uid;
 	const twitchId = user?.twitchId;
-	const [{ appSettings: settings } = { appSettings: {} }] = useDocumentData<SettingsDocument>(
+	const [{ appSettings: settings, filters } = { appSettings: {}, filters: {} }] = useDocumentData<SettingsDocument>(
 		firebaseClient.db.collection("Streamers").doc(uid || " ")
 	);
 
@@ -97,6 +99,7 @@ export const AppContextProvider = props => {
 	return (
 		<AppContext.Provider
 			value={{
+				filters,
 				titleBarRef,
 				windowFocused,
 				setWindowFocused,

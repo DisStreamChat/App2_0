@@ -28,6 +28,9 @@ import { Main } from "../../styles/global.styles";
 import { SearchContainer } from "../settings";
 import { displayMotes } from "../../../utils/constants";
 import EmotePicker from "../../components/shared/emotePicker";
+import { HandleFilters } from "../../functions/filter.util";
+import { useTitle } from "../../hooks/useTitle";
+import { TabItem } from "../../components/TabItem";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -200,7 +203,7 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const [addingChannel, setAddingChannel] = useState(false);
-	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, titleBarRef } =
+	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, titleBarRef, filters } =
 		useContext(AppContext);
 	const { user } = useContext(authContext);
 	const [messageQuery, setMessageQuery] = useState("");
@@ -217,10 +220,7 @@ const Chat = () => {
 	const tabRef = useRef<HTMLElement>();
 	const chatRef = useRef<any>();
 
-	useEffect(() => {
-		console.log(channel);
-		titleBarRef?.current?.updateTitle?.(`DisStreamChat - ${channel.twitchName || ""}`);
-	}, [titleBarRef, channel]);
+	useTitle(channel?.twitchName || "");
 
 	useEffect(() => {
 		(async () => {
@@ -253,12 +253,6 @@ const Chat = () => {
 			}
 		})();
 	}, [user, channel]);
-
-	useSocketEvent(socket, "connect", () => {
-		if (channel) {
-			socket.emit("add", { ...channel, leaveAll: true });
-		}
-	});
 
 	useEffect(() => {
 		return () => {
@@ -293,7 +287,21 @@ const Chat = () => {
 
 	useEffect(() => {
 		if (channel) {
-			ipcRenderer.on("sendMessages", (event, messages) => {
+			if (socket) {
+				socket.emit("add", { ...channel, leaveAll: true });
+			}
+		}
+	}, [channel, socket]);
+
+	useSocketEvent(socket, "connect", () => {
+		if (channel) {
+			socket.emit("add", { ...channel, leaveAll: true });
+		}
+	});
+
+	useEffect(() => {
+		if (channel) {
+			ipcRenderer.once("sendMessages", (event, messages) => {
 				setMessages(messages);
 			});
 			ipcRenderer.send("getMessages", channel.twitchName);
@@ -303,16 +311,49 @@ const Chat = () => {
 		};
 	}, [channel]);
 
-	useEffect(() => {
-		if (channel) {
-			if (socket) {
-				socket.emit("add", { ...channel, leaveAll: true });
-			}
-		}
-	}, [channel, socket]);
-
 	useSocketEvent(socket, "chatmessage", msg => {
-		buffer.push(msg);
+		if (msg.replyParentDisplayName) {
+			msg.body =
+				`<span class="reply-header">Replying to ${msg.replyParentDisplayName}: ${msg.replyParentMessageBody}</span>${msg.body}`.replace(
+					`@${msg.replyParentDisplayName}`,
+					""
+				);
+		}
+
+		// const nameRegex = new RegExp(`(?<=\\s|^)(@?${user?.name})`, "igm");
+
+		const transformedMessage = {
+			content: msg.body,
+			id: msg.id,
+			platform: msg.platform,
+			sentAt: msg.sentAt,
+			type: msg.type,
+			sender: {
+				name: msg.displayName,
+				avatar: msg.avatar,
+				badges: msg.badges || {},
+				color: msg.userColor,
+			},
+			streamer: msg.channel,
+			moddable: true,
+			read: false,
+		};
+
+		transformedMessage.moddable =
+			msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||
+			(!Object.keys(msg.badges || {}).includes("moderator") &&
+				!Object.keys(msg.badges || {}).includes("broadcaster"));
+
+		if (
+			msg.platform !== "discord" &&
+			msg?.displayName?.toLowerCase?.() !== user?.name?.toLowerCase?.() &&
+			channel?.TwitchName?.toLowerCase?.() === user?.name?.toLowerCase?.()
+		)
+			transformedMessage.moddable = true;
+		if (msg.displayName.toLowerCase() === "disstreamchat") transformedMessage.moddable = false;
+		ipcRenderer.send("writeMessage", msg.channel, transformedMessage);
+		if (msg.channel !== channel.twitchName) return;
+		buffer.push(transformedMessage);
 	});
 
 	const getChatters = async () => {
@@ -344,48 +385,7 @@ const Chat = () => {
 
 	useEffect(() => {
 		if (channel) {
-			buffer.subscribe(msg => {
-				if (msg.replyParentDisplayName) {
-					msg.body =
-						`<span class="reply-header">Replying to ${msg.replyParentDisplayName}: ${msg.replyParentMessageBody}</span>${msg.body}`.replace(
-							`@${msg.replyParentDisplayName}`,
-							""
-						);
-				}
-
-				const nameRegex = new RegExp(`(?<=\\s|^)(@?${user?.name})`, "igm");
-				msg.body = `<p>${msg.body.replace(nameRegex, "<span class='ping'>$&</span>")}</p>`;
-
-				const transformedMessage = {
-					content: msg.body,
-					id: msg.id,
-					platform: msg.platform,
-					sentAt: msg.sentAt,
-					type: msg.type,
-					sender: {
-						name: msg.displayName,
-						avatar: msg.avatar,
-						badges: msg.badges || {},
-						color: msg.userColor,
-					},
-					streamer: channel.twitchName,
-					moddable: true,
-				};
-
-				transformedMessage.moddable =
-					msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||
-					(!Object.keys(msg.badges || {}).includes("moderator") &&
-						!Object.keys(msg.badges || {}).includes("broadcaster"));
-
-				if (
-					msg.platform !== "discord" &&
-					msg?.displayName?.toLowerCase?.() !== user?.name?.toLowerCase?.() &&
-					channel?.TwitchName?.toLowerCase?.() === user?.name?.toLowerCase?.()
-				)
-					transformedMessage.moddable = true;
-				if (msg.displayName.toLowerCase() === "disstreamchat") transformedMessage.moddable = false;
-
-				ipcRenderer.send("writeMessage", channel.twitchName, transformedMessage);
+			buffer.subscribe(transformedMessage => {
 				setMessages(prev => [...prev, transformedMessage]);
 			});
 		}
@@ -435,24 +435,27 @@ const Chat = () => {
 
 	const displayedMessages = useMemo(
 		() =>
-			flagMatches
-				.filter(msg => {
-					const definedSettings = settings || {};
-					if (definedSettings.IgnoreChannelPoints && msg.type === "channel-points") return false;
-					if (definedSettings.IgnoreCheers && msg.type === "cheer") return false;
-					if (definedSettings.IgnoreFollors && msg.type === "follow") return false;
-					if (definedSettings.IgnoreSubscriptions && msg.type === "subscription") return false;
-					if (definedSettings.IgnoredUsers?.find(user => user.value === msg.sender.name.toLowerCase()))
-						return false;
-					if (
-						definedSettings.IgnoredCommandPrefixes?.find(prefix =>
-							msg.content.replace(/<[^>]*>?/gm, "").startsWith(prefix.value)
+			HandleFilters(
+				filters,
+				flagMatches
+					.filter(msg => {
+						const definedSettings = settings || {};
+						if (definedSettings.IgnoreChannelPoints && msg.type === "channel-points") return false;
+						if (definedSettings.IgnoreCheers && msg.type === "cheer") return false;
+						if (definedSettings.IgnoreFollors && msg.type === "follow") return false;
+						if (definedSettings.IgnoreSubscriptions && msg.type === "subscription") return false;
+						if (definedSettings.IgnoredUsers?.find(user => user.value === msg.sender.name.toLowerCase()))
+							return false;
+						if (
+							definedSettings.IgnoredCommandPrefixes?.find(prefix =>
+								msg.content.replace(/<[^>]*>?/gm, "").startsWith(prefix.value)
+							)
 						)
-					)
-						return false;
-					return true;
-				})
-				.slice(-Math.max(settings?.MessageLimit, 100)),
+							return false;
+						return true;
+					})
+					.slice(-Math.max(settings?.MessageLimit, 100))
+			),
 		[flagMatches, settings]
 	);
 
@@ -467,17 +470,7 @@ const Chat = () => {
 						exit={{ height: 0 }}
 					>
 						{tabChannels.map(channel => (
-							<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`}>
-								<Link href={`/chat/${channel.id}`}>
-									<a>{channel.name}</a>
-								</Link>
-								<CloseIcon
-									style={{ cursor: "pointer" }}
-									onClick={() => {
-										setTabChannels(prev => prev.filter(c => c.id !== channel.id));
-									}}
-								/>
-							</Tab>
+							<TabItem channel={channel} id={id} />
 						))}
 						<ClickAwayListener
 							onClickAway={() => {

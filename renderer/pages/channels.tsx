@@ -1,15 +1,18 @@
-import React, { useContext } from 'react';
-import Reorder, { reorder } from 'react-reorder';
+import React, { useContext } from "react";
+import Reorder, { reorder } from "react-reorder";
+import { useTitle } from "../hooks/useTitle";
 
-import { ChannelItem, ChannelSearchItem } from '../components/shared/channelItem/channelItem';
-import { AppContext } from '../contexts/appContext';
-import { authContext } from '../contexts/authContext';
-import firebaseClient from '../firebase/client';
-import { ChannelMain, ModChannels } from '../styles/channels.styles';
+import { ChannelItem, ChannelSearchItem } from "../components/shared/channelItem/channelItem";
+import { AppContext } from "../contexts/appContext";
+import { authContext } from "../contexts/authContext";
+import firebaseClient from "../firebase/client";
+import { ChannelMain, ModChannels } from "../styles/channels.styles";
 
 const Channels = () => {
 	const { savedChannels, setSavedChannels, setTabChannels, appActive } = useContext(AppContext);
 	const { user } = useContext(authContext);
+
+	useTitle("channels");
 
 	const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
 		setSavedChannels(prev => {

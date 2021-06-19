@@ -10,6 +10,9 @@ import { AuthContextProvider } from "../contexts/authContext";
 import { SocketContextProvider, useSocketContext } from "../contexts/socketContext";
 import { useInterval } from "react-use";
 import { ipcRenderer } from "electron";
+import sha1 from "sha1";
+import firebaseClient from "../firebase/client";
+import useSocketEvent from "../hooks/useSocketEvent";
 
 const Border = styled.div`
 	border: 1px solid black;
@@ -26,7 +29,7 @@ const mainPaths = ["channels", "chat"];
 
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
-	const { settings, titleBarRef } = useContext(AppContext);
+	const { settings, titleBarRef, tabChannels } = useContext(AppContext);
 	const { socket } = useSocketContext();
 	const router = useRouter();
 
@@ -107,6 +110,33 @@ function MyApp({ Component, pageProps }) {
 		})();
 	}, []);
 
+	const joinAllChannels = async () => {
+		const channels = [];
+		for (const { id } of tabChannels) {
+			if (!id) continue;
+			const firebaseId = sha1(id);
+			const docRef = firebaseClient.db.collection("Streamers").doc(firebaseId);
+			const doc = await docRef.get();
+			if (doc.exists) {
+				const data = doc.data();
+				const { guildId, liveChatId, TwitchName: twitchName } = data;
+				channels.push({ guildId, liveChatId, twitchName });
+			} else {
+				const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/v2/twitch/exists?channel=${id}`);
+				const json = await response.json();
+				const { data } = json;
+				channels.push({ twitchName: data.login });
+			}
+		}
+		for(const channel of channels){
+			socket?.emit?.("add", channel)
+		}
+	};
+
+	useEffect(() => {
+		joinAllChannels();
+	}, [tabChannels, socket]);
+
 	// useEffect(() => {
 	// 	if (socket) {
 	// 		socket.emit("add", {
@@ -126,6 +156,9 @@ function MyApp({ Component, pageProps }) {
 	// 		twitchName: "dscnotifications",
 	// 	});
 	// });
+	useSocketEvent(socket, "connect", () => {
+		joinAllChannels();
+	});
 
 	const currentWindow = remote?.getCurrentWindow?.();
 
