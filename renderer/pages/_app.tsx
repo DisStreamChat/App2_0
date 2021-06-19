@@ -45,6 +45,7 @@ function MyApp({ Component, pageProps }) {
 							{
 								label: "Always on Top",
 								type: "checkbox",
+								checked: true,
 								click: ({ checked }) => ipcRenderer.send("setAlwaysOnTop", checked),
 							},
 							{
@@ -128,8 +129,8 @@ function MyApp({ Component, pageProps }) {
 				channels.push({ twitchName: data.login });
 			}
 		}
-		for(const channel of channels){
-			socket?.emit?.("add", channel)
+		for (const channel of channels) {
+			socket?.emit?.("add", channel);
 		}
 	};
 

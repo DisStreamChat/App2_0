@@ -8,7 +8,7 @@ import { SettingsDocument, Settings } from "../models/settings.model";
 import { apiFetch } from "../functions/fetching";
 import { useInteraction } from "../hooks/useInteraction";
 import { Titlebar } from "custom-electron-titlebar/titlebar";
-import { Filter } from "../models/filter.model";
+import { Filters, Highlights } from "../models/filter.model";
 
 interface TwitchDetails {
 	login: string;
@@ -31,7 +31,8 @@ export interface AppContextModel {
 	setWindowFocused: React.Dispatch<React.SetStateAction<boolean>>;
 	active: boolean;
 	titleBarRef: React.MutableRefObject<Titlebar>;
-	filters: { [key: string]: Filter };
+	filters: Filters;
+	highlights: Highlights;
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -98,6 +99,7 @@ export const AppContextProvider = props => {
 	return (
 		<AppContext.Provider
 			value={{
+				highlights,
 				filters,
 				titleBarRef,
 				windowFocused,
