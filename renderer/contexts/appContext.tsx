@@ -33,6 +33,8 @@ export interface AppContextModel {
 	titleBarRef: React.MutableRefObject<Titlebar>;
 	filters: Filters;
 	highlights: Highlights;
+	channelsWithHighlights: Set<string>;
+	setChannelsWithHighlights: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
 export const AppContext = createContext<AppContextModel>(null);
@@ -40,6 +42,7 @@ export const AppContext = createContext<AppContextModel>(null);
 export const AppContextProvider = props => {
 	const [savedChannels, setSavedChannels] = useState<ChannelModel[]>([]);
 	const [tabChannels, setTabChannels] = useState<ChannelModel[]>([]);
+	const [channelsWithHighlights, setChannelsWithHighlights] = useState<Set<string>>(new Set([]));
 	const [tabsOpen, setTabsOpen] = useState(false);
 	const { user } = useContext(authContext);
 	const [twitchDetails, setTwitchDetails] = useState<TwitchDetails>(null);
@@ -99,7 +102,9 @@ export const AppContextProvider = props => {
 	return (
 		<AppContext.Provider
 			value={{
-				highlights,
+				channelsWithHighlights,
+				setChannelsWithHighlights,
+				highlights: highlights || {},
 				filters,
 				titleBarRef,
 				windowFocused,

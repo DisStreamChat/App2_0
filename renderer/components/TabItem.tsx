@@ -8,29 +8,35 @@ import { useStats } from "../hooks/useStats";
 import { LiveIndicator } from "./shared/ui-components/LiveIndicator";
 import { useSocketContext } from "../contexts/socketContext";
 
-export interface TabItemProps {
-	channel: ChannelModel;
-	id: string;
+export interface TabItemProps extends ChannelModel {
+	userId: string;
 }
 
-export const TabItem = ({ channel, id }: TabItemProps) => {
-	const { setTabChannels } = useContext(AppContext);
+const RawTabItem = ({ name, id, userId }: TabItemProps) => {
+	const { setTabChannels, channelsWithHighlights } = useContext(AppContext);
 	const { socket } = useSocketContext();
-	const stats = useStats(channel.name);
+	const stats = useStats(name);
 
 	return (
-		<Tab key={channel.id} className={`${id === channel.id ? "active" : ""}`} hasUnreadMessages={true} hasHighlightMatches={false}>
+		<Tab
+			key={id}
+			className={`${userId === id ? "active" : ""}`}
+			hasUnreadMessages={false}
+			hasHighlightMatches={channelsWithHighlights.has(name?.toLowerCase?.())}
+		>
 			<LiveIndicator live={stats?.isLive} />
-			<Link href={`/chat/${channel.id}`}>
-				<a>{channel.name}</a>
+			<Link href={`/chat/${id}`}>
+				<a>{name}</a>
 			</Link>
 			<CloseIcon
 				style={{ cursor: "pointer" }}
 				onClick={() => {
-					setTabChannels(prev => prev.filter(c => c.id !== channel.id));
-					socket.emit("remove", { twitchName: channel.name });
+					setTabChannels(prev => prev.filter(c => c.id !== id));
+					socket.emit("remove", { twitchName: name });
 				}}
 			/>
 		</Tab>
 	);
 };
+
+export const TabItem = React.memo(RawTabItem);

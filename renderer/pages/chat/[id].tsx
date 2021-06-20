@@ -79,8 +79,8 @@ const ChannelList = styled.ul`
 	}
 `;
 
-class QueueBuffer {
-	_queue: any[];
+class QueueBuffer<T = any> {
+	_queue: T[];
 	_timeout: number;
 	_timer: any;
 	constructor(array = []) {
@@ -90,7 +90,7 @@ class QueueBuffer {
 		this._timer = null;
 	}
 
-	push(val) {
+	push(val: T) {
 		this._queue.push(val);
 	}
 
@@ -98,7 +98,7 @@ class QueueBuffer {
 		this._timeout = val;
 	}
 
-	subscribe(callback) {
+	subscribe(callback: (value: T) => void) {
 		// callback(this._queue.shift());
 		this._timer = setInterval(() => {
 			const value = this._queue.shift();
@@ -113,7 +113,7 @@ class QueueBuffer {
 	}
 }
 
-const buffer = new QueueBuffer();
+const buffer = new QueueBuffer<MessageModel>();
 
 const ChatInputContainer = styled.div`
 	.auto-complete-dropdown {
@@ -204,8 +204,18 @@ const Chat = () => {
 	const [messages, setMessages] = useState<MessageModel[]>([]);
 	const [channel, setChannel] = useState<any>();
 	const [addingChannel, setAddingChannel] = useState(false);
-	const { tabChannels, savedChannels, setTabChannels, settings, appActive, active, filters, highlights } =
-		useContext(AppContext);
+	const {
+		tabChannels,
+		savedChannels,
+		setTabChannels,
+		settings,
+		appActive,
+		active,
+		filters,
+		highlights,
+		channelsWithHighlights,
+		setChannelsWithHighlights,
+	} = useContext(AppContext);
 	const { user } = useContext(authContext);
 	const [messageQuery, setMessageQuery] = useState("");
 	const [isMod, setIsMod] = useState(false);
@@ -343,6 +353,10 @@ const Chat = () => {
 
 		transformedMessage.highlighted = shouldHighlight(transformedMessage, highlights);
 
+		if (transformedMessage.highlighted) {
+			setChannelsWithHighlights(prev => new Set([...prev, transformedMessage.streamer]));
+		}
+
 		transformedMessage.moddable =
 			msg?.displayName?.toLowerCase?.() === user?.name?.toLowerCase?.() ||
 			(!Object.keys(msg.badges || {}).includes("moderator") &&
@@ -474,7 +488,7 @@ const Chat = () => {
 						exit={{ height: 0 }}
 					>
 						{tabChannels.map(channel => (
-							<TabItem channel={channel} id={id} />
+							<TabItem {...channel} userId={id} />
 						))}
 						<ClickAwayListener
 							onClickAway={() => {

@@ -10,7 +10,7 @@ export const Tab = styled.div`
 	background: #212121;
 	/* color: black; */
 	height: 28px;
-	border-top: 1px solid
+	border-top: 2px solid
 		${({ hasUnreadMessages, hasHighlightMatches }: TabProps) =>
 			hasHighlightMatches ? "#2e86de" : hasUnreadMessages ? "#ee5253" : "gray"};
 	/* clip-path: polygon(1rem 0%, 100% 0%, 100% 100%, 0 100%, 0 1rem); */
@@ -32,7 +32,7 @@ export const Tab = styled.div`
 	}
 	&.active {
 		background: #424242;
-		border-top: 1px solid #2e86de;
+		border-top: 2px solid #009432;
 	}
 	a {
 		display: block;
