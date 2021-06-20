@@ -116,6 +116,25 @@ ipcMain.on("open-menu", (event, path) => {
 	menuWindow.on("close", () => (menuWindows[path] = null));
 });
 
+let userMenuWindows: { [key: string]: Electron.BrowserWindow | null } = {};
+ipcMain.on("open-user-menu", (event, path, id) => {
+	let userWindow = userMenuWindows[path];
+	if (userWindow) {
+		if (userWindow.isMinimized()) userWindow.restore();
+		userWindow.focus();
+		return;
+	}
+	userWindow = createWindow(path, {
+		width: 250,
+		height: 500,
+		transparent: false,
+		backgroundColor: "#2a2c30",
+	});
+	userMenuWindows[path] = userWindow;
+	userWindow.loadURL(`${baseUrl(path)}/${id}`);
+	userWindow.on("close", () => (userMenuWindows[path] = null));
+});
+
 ipcMain.on("clear-hotkeys", () => {
 	hotKeyManager.unregisterAll();
 });
