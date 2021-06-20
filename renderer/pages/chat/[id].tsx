@@ -640,7 +640,6 @@ const Chat = () => {
 											setChatValue(e.target.value);
 										}}
 									></ReactTextareaAutocomplete>
-									{/* will be used in the future */}
 									<Tooltip title="Emote Picker" arrow>
 										<EmoteButton
 											onClick={() => {
@@ -663,18 +662,20 @@ const Chat = () => {
 					<EmotePicker
 						onEmoteSelect={emote => {
 							const position = chatRef.current.getCaretPosition();
+							const emoteText = emote.native || emote.name;
 
 							setChatValue(prev => {
 								const start = prev.slice(0, position);
 								const end = prev.slice(position);
-								const emoteText = emote.native || emote.name;
-								chatRef.current.setCaretPosition(position + emoteText.length);
-								return `${start}${emoteText}${end}`;
+								return `${start}${emoteText} ${end}`;
 							});
+							setTimeout(() => {
+								chatRef.current.setCaretPosition(position + emoteText.length + 1);
+							}, 200);
 						}}
 						emotes={userEmotes}
 						onClickAway={() => setEmotePickerVisible(false)}
-						visible={emotePickerVisible}
+						visible={emotePickerVisible && showChatBox && active}
 					/>
 				</AnimatePresence>
 			</ChatContainer>

@@ -171,11 +171,6 @@ const Header = () => {
 								>
 									<SettingsIcon />
 								</ClearButton>
-								{chatHeader && (
-									<ClearButton>
-										<MoreVertIcon />
-									</ClearButton>
-								)}
 							</div>
 						</Icons>
 					</IconSection>
