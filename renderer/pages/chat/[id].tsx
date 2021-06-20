@@ -32,6 +32,7 @@ import { HandleFilters } from "../../functions/filter.util";
 import { useTitle } from "../../hooks/useTitle";
 import { TabItem } from "../../components/TabItem";
 import { shouldHighlight } from "../../functions/highlight.util";
+import Select from "../../components/Select";
 
 const ChatMain = styled(Main)`
 	flex-direction: column;
@@ -500,31 +501,31 @@ const Chat = () => {
 									style={{ paddingBottom: "0rem", paddingTop: "0rem", marginTop: ".125rem" }}
 									className="add-button"
 									onClick={() => {
-										setAddingChannel(true);
+										setAddingChannel(prev => !prev);
 									}}
 								>
 									<AddIcon />
 								</ClearButton>
 								{addingChannel && (
-									<ChannelList>
-										{savedChannels
+									<Select
+										onChange={option => {
+											const channel = savedChannels.find(
+												channel => channel.id === option.value.split("=")[1]
+											);
+											setTabChannels(prev => [...prev, channel]);
+											setAddingChannel(false);
+										}}
+										value={tabChannels.map(channel => ({
+											label: channel.name,
+											value: `${channel.name}=${channel.id}`,
+										}))}
+										options={savedChannels
 											.filter(channel => !tabChannels.find(tab => channel.id === tab.id))
-											.map(channel => (
-												<li
-													onClick={() => {
-														setTabChannels(prev => {
-															const newList = [...prev, channel];
-															ipcRenderer.send("writeTabs", user.uid, newList);
-															return newList;
-														});
-														setAddingChannel(false);
-													}}
-													key={channel.id}
-												>
-													{channel.name}
-												</li>
-											))}
-									</ChannelList>
+											.map(channel => ({
+												value: `${channel.name}=${channel.id}`,
+												label: channel.name,
+											}))}
+									/>
 								)}
 							</div>
 						</ClickAwayListener>
@@ -532,7 +533,7 @@ const Chat = () => {
 				)}
 			</AnimatePresence>
 			<ChatContainer
-				tabHeight={tabRef.current?.scrollHeight}
+				tabHeight={tabRef.current?.clientHeight}
 				ref={bodyRef as any}
 				style={{ fontFamily: settings?.Font }}
 				className={`${appActive ? "active" : ""} ${settings?.ShowTabs ? "tabs" : ""} ${
