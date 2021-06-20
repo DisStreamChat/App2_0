@@ -269,6 +269,8 @@ const Chat = () => {
 	useEffect(() => {
 		return () => {
 			setMessages([]);
+			setChannel({});
+			setChatValue("");
 		};
 	}, [id]);
 
