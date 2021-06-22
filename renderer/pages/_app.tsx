@@ -25,7 +25,7 @@ const Border = styled.div`
 	pointer-events: none;
 `;
 
-const mainPaths = ["channels", "chat"];
+const mainPaths = ["channels", "chat", "auth"];
 
 function MyApp({ Component, pageProps }) {
 	const [windowFocused, setWindowFocused] = useState(true);
@@ -49,9 +49,6 @@ function MyApp({ Component, pageProps }) {
 								click: ({ checked }) => ipcRenderer.send("setAlwaysOnTop", checked),
 							},
 							{
-								label: "Channel Info",
-							},
-							{
 								label: "Channel Options",
 							},
 							{
@@ -65,11 +62,8 @@ function MyApp({ Component, pageProps }) {
 						],
 					},
 					{
-						label: "Extras",
+						label: "Channel Info",
 						submenu: [
-							{
-								label: "Emotes",
-							},
 							{
 								label: "Followers",
 							},
